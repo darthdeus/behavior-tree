@@ -3,6 +3,7 @@
 [![Crates.io](https://img.shields.io/crates/v/behavior-tree)](https://crates.io/crates/behavior-tree)
 ![Crates.io (latest)](https://img.shields.io/crates/dv/behavior-tree)
 ![Crates.io](https://img.shields.io/crates/l/behavior-tree)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/darthdeus/behavior-tree)
 ![GitHub branch checks state](https://img.shields.io/github/checks-status/darthdeus/behavior-tree/master)
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/darthdeus/behavior-tree/rust)](https://github.com/darthdeus/behavior-tree/actions)
 
