@@ -4,6 +4,13 @@ version = "0.0.1"
 edition = "2021"
 license = "MIT"
 
+authors = ["Jakub Arnold <darthdeus@gmail.com>"]
+description = "Yet another behavior tree library for rust!"
+documentation = "https://docs.rs/behavior-tree"
+repository = "https://github.com/darthdeus/behavior-tree"
+
+keywords = ["gamedev", "ai"]
+
 [lib]
 doctest = false
 
