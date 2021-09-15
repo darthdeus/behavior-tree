@@ -1,5 +1,9 @@
 use crate::types::*;
 
+pub trait StatefulAction<T, P> {
+    fn tick(&mut self, data: &mut T, props: &P) -> Status;
+}
+
 pub struct BehaviorTree<T, P> {
     pub tree: Behavior<T, P>,
     pub debug: TreeRepr,
@@ -17,12 +21,16 @@ pub enum Behavior<T, P> {
 
     // TODO: store cursor here + continue from where left off
     Sequence(Vec<Behavior<T, P>>),
-    // Select(Vec<Behavior<T, P>>),
     Action(String, fn(&mut T, &P) -> Status),
     ActionSuccess(String, fn(&mut T, &P) -> ()),
+
+    StatefulAction(String, Box<dyn StatefulAction<T, P>>),
+    // StatefulAction(String, fn(&mut T, &P) -> Status),
+
+    // Select(Vec<Behavior<T, P>>),
+
     // Invert(Box<Behavior<T, P>>),
     // AlwaysSucceed(Box<Behavior<T, P>>),
-    // StatefulAction(Box<dyn Fn(&mut T, &P) -> Status>),
     // Condition(Box<dyn Fn(f64, &mut T, &P) -> bool>, Box<Behavior<T, P>>),
     // WaitForever,
     // Action(T),
@@ -116,7 +124,16 @@ impl<T, P> Behavior<T, P> {
                     Status::Success,
                     DebugRepr::new(name, Cursor::Leaf, Status::Success),
                 );
-            } // Behavior::Invert(b) => match b.tick(delta, context, props).0 {
+            }
+            Behavior::StatefulAction(name, action) => {
+                let status = action.tick(context, props);
+                return (status, DebugRepr::new(name, Cursor::Leaf, status));
+            }
+
+
+
+
+            // Behavior::Invert(b) => match b.tick(delta, context, props).0 {
               //     Status::Success => Status::Failure,
               //     Status::Failure => Status::Success,
               //     Status::Running => Status::Running,
@@ -173,6 +190,9 @@ impl<T, P> Behavior<T, P> {
             }
             Behavior::ActionSuccess(name, _) => {
                 TreeRepr::new("ActionSuccess", vec![]).with_detail(format!("{}", name))
+            }
+            Behavior::StatefulAction(name, _) => {
+                TreeRepr::new("StatefulAction", vec![]).with_detail(format!("{}", name))
             }
         }
     }

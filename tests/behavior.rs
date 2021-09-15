@@ -4,6 +4,17 @@ struct Counter {
     value: i32,
 }
 
+impl StatefulAction<(), ()> for Counter {
+    fn tick(&mut self, _data: &mut (), _props: &()) -> Status {
+        if self.value == 0 {
+            self.value += 1;
+            Status::Running
+        } else {
+            Status::Success
+        }
+    }
+}
+
 fn inc_once(data: &mut Counter, _: &()) -> Status {
     if data.value % 2 == 0 {
         data.value += 1;
@@ -48,6 +59,51 @@ fn test_simple_sequence() {
     assert_eq!(status, Status::Success);
     assert_eq!(data.value, 2);
     assert_eq!(debug_repr.cursor.index(), 0);
+}
+
+#[test]
+fn test_stateful_action() {
+    let mut bt: Behavior<(), ()> = sequence![
+        Behavior::StatefulAction("inc_x".to_owned(), Box::new(Counter { value: 0 })),
+        Behavior::StatefulAction("inc_y".to_owned(), Box::new(Counter { value: 0 }))
+    ];
+
+    //   Player visible?
+    //  / \
+    // S   Wait
+    // |
+    // X -> Y
+    //
+    // sequence(start_attack, wait, stop_attack)
+
+    let mut data = ();
+
+    let (status, debug_repr) = bt.tick(0.0, &mut data, &());
+    dbg!(&debug_repr);
+    // assert_eq!(data.x, 1);
+    // assert_eq!(data.y, 0);
+    assert_eq!(status, Status::Running);
+    assert_eq!(debug_repr.cursor.index(), 0);
+
+    let (status, debug_repr) = bt.tick(0.0, &mut data, &());
+    dbg!(&debug_repr);
+    // assert_eq!(data.x, 1);
+    // assert_eq!(data.y, 1);
+    assert_eq!(status, Status::Running);
+    assert_eq!(debug_repr.cursor.index(), 1);
+
+    let (status, debug_repr) = bt.tick(0.0, &mut data, &());
+    dbg!(&debug_repr);
+    // assert_eq!(data.x, 1);
+    // assert_eq!(data.y, 1);
+    assert_eq!(status, Status::Success);
+    assert_eq!(debug_repr.cursor.index(), 1);
+
+    // let (status, debug_repr) = bt.tick(0.0, &mut data, &());
+    // dbg!(&debug_repr);
+    // assert_eq!(data.value, 4);
+    // assert_eq!(status, Status::Success);
+    // assert_eq!(debug_repr.cursor.index(), 1);
 }
 
 #[test]
