@@ -35,6 +35,6 @@ macro_rules! action_success {
 #[macro_export]
 macro_rules! sequence {
     ($($x:expr),+) => {
-        Behavior::Sequence(vec![$($x),+])
+        Behavior::Sequence(0, vec![$($x),+])
     }
 }

@@ -58,7 +58,7 @@ fn test_simple_sequence() {
     let (status, debug_repr) = bt.tick(0.0, &mut data, &());
     assert_eq!(status, Status::Success);
     assert_eq!(data.value, 2);
-    assert_eq!(debug_repr.cursor.index(), 0);
+    assert_eq!(debug_repr.cursor.index(), 1);
 }
 
 #[test]
@@ -79,25 +79,25 @@ fn test_stateful_action() {
     let mut data = ();
 
     let (status, debug_repr) = bt.tick(0.0, &mut data, &());
-    dbg!(&debug_repr);
+    // dbg!(&debug_repr);
     // assert_eq!(data.x, 1);
     // assert_eq!(data.y, 0);
     assert_eq!(status, Status::Running);
     assert_eq!(debug_repr.cursor.index(), 0);
 
     let (status, debug_repr) = bt.tick(0.0, &mut data, &());
-    dbg!(&debug_repr);
+    // dbg!(&debug_repr);
     // assert_eq!(data.x, 1);
     // assert_eq!(data.y, 1);
     assert_eq!(status, Status::Running);
     assert_eq!(debug_repr.cursor.index(), 1);
 
     let (status, debug_repr) = bt.tick(0.0, &mut data, &());
-    dbg!(&debug_repr);
+    // dbg!(&debug_repr);
     // assert_eq!(data.x, 1);
     // assert_eq!(data.y, 1);
     assert_eq!(status, Status::Success);
-    assert_eq!(debug_repr.cursor.index(), 1);
+    assert_eq!(debug_repr.cursor.index(), 2);
 
     // let (status, debug_repr) = bt.tick(0.0, &mut data, &());
     // dbg!(&debug_repr);
@@ -158,7 +158,7 @@ fn test_nested_sequence() {
     assert_eq!(data.x, 1);
     assert_eq!(data.y, 1);
     assert_eq!(status, Status::Success);
-    assert_eq!(debug_repr.cursor.index(), 1);
+    assert_eq!(debug_repr.cursor.index(), 2);
 
     // let (status, debug_repr) = bt.tick(0.0, &mut data, &());
     // dbg!(&debug_repr);

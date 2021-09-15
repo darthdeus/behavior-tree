@@ -20,7 +20,7 @@ pub enum Behavior<T, P> {
     ),
 
     // TODO: store cursor here + continue from where left off
-    Sequence(Vec<Behavior<T, P>>),
+    Sequence(usize, Vec<Behavior<T, P>>),
     Action(String, fn(&mut T, &P) -> Status),
     ActionSuccess(String, fn(&mut T, &P) -> ()),
 
@@ -71,20 +71,20 @@ impl<T, P> Behavior<T, P> {
                 return (status, repr);
             }
 
-            Behavior::Sequence(xs) => {
+            Behavior::Sequence(ref mut current, xs) => {
                 let mut repr_string = String::new();
                 let mut status = Status::Success;
-                let mut index = 0;
+                // let mut index = 0;
                 let mut child_repr = None;
 
                 let len = xs.len();
 
-                for (i, x) in xs.iter_mut().enumerate() {
+                while *current < len {
+                    let x = &mut xs[*current];
+
                     match x.tick(delta, context, props) {
                         (Status::Success, repr) => {
-                            if i < len - 1 {
-                                index += 1;
-                            }
+                            *current += 1;
                             repr_string += "+";
                             child_repr = Some(repr);
                         }
@@ -105,9 +105,35 @@ impl<T, P> Behavior<T, P> {
                     }
                 }
 
+                // for (i, x) in xs.iter_mut().enumerate() {
+                //     match x.tick(delta, context, props) {
+                //         (Status::Success, repr) => {
+                //             if i < len - 1 {
+                //                 index += 1;
+                //             }
+                //             repr_string += "+";
+                //             child_repr = Some(repr);
+                //         }
+                //         (Status::Failure, repr) => {
+                //             status = Status::Failure;
+                //             repr_string += "-";
+                //             child_repr = Some(repr);
+                //             break;
+                //             // return (Status::Failure, DebugRepr::new("Sequence", Status::Failure))
+                //         }
+                //         (Status::Running, repr) => {
+                //             status = Status::Running;
+                //             repr_string += ".";
+                //             child_repr = Some(repr);
+                //             break;
+                //             // return (Status::Running, DebugRepr::new("Sequence", Status::Running))
+                //         }
+                //     }
+                // }
+
                 let mut repr = DebugRepr::new(
                     "Sequence",
-                    Cursor::Index(index, Box::new(child_repr.unwrap())),
+                    Cursor::Index(*current, Box::new(child_repr.unwrap())),
                     status,
                 );
                 repr.params = Some(repr_string);
@@ -128,12 +154,7 @@ impl<T, P> Behavior<T, P> {
             Behavior::StatefulAction(name, action) => {
                 let status = action.tick(context, props);
                 return (status, DebugRepr::new(name, Cursor::Leaf, status));
-            }
-
-
-
-
-            // Behavior::Invert(b) => match b.tick(delta, context, props).0 {
+            } // Behavior::Invert(b) => match b.tick(delta, context, props).0 {
               //     Status::Success => Status::Failure,
               //     Status::Failure => Status::Success,
               //     Status::Running => Status::Running,
@@ -182,7 +203,7 @@ impl<T, P> Behavior<T, P> {
                 TreeRepr::new("If", vec![a.to_debug(), b.to_debug()])
                     .with_detail(format!("{}", name))
             }
-            Behavior::Sequence(seq) => {
+            Behavior::Sequence(_, seq) => {
                 TreeRepr::new("Sequence", seq.iter().map(|x| x.to_debug()).collect())
             }
             Behavior::Action(name, _) => {
