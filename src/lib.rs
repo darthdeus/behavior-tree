@@ -1,5 +1,3 @@
-#![feature(derive_default_enum)]
-
 pub use crate::macros::*;
 pub use crate::tree::*;
 pub use crate::types::*;

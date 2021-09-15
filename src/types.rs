@@ -1,10 +1,15 @@
-#[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Status {
     Success,
     Failure,
-    #[default]
     Running,
     // Initialized,
+}
+
+impl core::default::Default for Status {
+    fn default() -> Self {
+        Self::Running
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -34,12 +39,17 @@ impl TreeRepr {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub enum Cursor {
     // Condition(bool),
     Index(usize, Box<DebugRepr>),
-    #[default]
     Leaf,
+}
+
+impl core::default::Default for Cursor {
+    fn default() -> Self {
+        Self::Leaf
+    }
 }
 
 impl Cursor {
