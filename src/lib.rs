@@ -30,13 +30,13 @@ mod tests {
         let mut data = Data { counter: 0 };
 
         let (status, debug_repr) = bt.tick(0.0, &mut data, &());
+        // dbg!(&debug_repr);
         assert_eq!(status, Status::Running);
         assert_eq!(debug_repr.cursor.index(), 0);
-        dbg!(debug_repr);
 
         let (status, debug_repr) = bt.tick(0.0, &mut data, &());
+        // dbg!(&debug_repr);
         assert_eq!(status, Status::Success);
-        assert_eq!(dbg!(debug_repr).cursor.index(), 0);
-        // dbg!(debug_repr);
+        assert_eq!(debug_repr.cursor.index(), 0);
     }
 }

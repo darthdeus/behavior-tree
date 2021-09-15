@@ -69,9 +69,14 @@ impl<T, P> Behavior<T, P> {
                 let mut index = 0;
                 let mut child_repr = None;
 
-                for x in xs.iter_mut() {
+                let len = xs.len();
+
+                for (i, x) in xs.iter_mut().enumerate() {
                     match x.tick(delta, context, props) {
                         (Status::Success, repr) => {
+                            if i < len - 1 {
+                                index += 1;
+                            }
                             repr_string += "+";
                             child_repr = Some(repr);
                         }
@@ -90,8 +95,6 @@ impl<T, P> Behavior<T, P> {
                             // return (Status::Running, DebugRepr::new("Sequence", Status::Running))
                         }
                     }
-
-                    index += 1;
                 }
 
                 let mut repr = DebugRepr::new(
@@ -174,7 +177,6 @@ impl<T, P> Behavior<T, P> {
         }
     }
 }
-
 
 impl<T, P> core::fmt::Debug for Behavior<T, P> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
