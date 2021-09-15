@@ -1,4 +1,5 @@
 use crate::types::*;
+use tracing::*;
 
 pub trait StatefulAction<T, P> {
     fn tick(&mut self, data: &mut T, props: &P) -> Status;
@@ -43,11 +44,13 @@ impl<T, P> Behavior<T, P> {
             Behavior::Wait(t_max, ref mut t) => {
                 *t -= delta;
                 let status = if *t < 0.0 {
+                    debug!("timer reset");
                     *t = *t_max;
                     Status::Success
                 } else {
                     Status::Running
                 };
+
 
                 return (status, DebugRepr::new("Wait", Cursor::Leaf, status));
             }
@@ -74,10 +77,14 @@ impl<T, P> Behavior<T, P> {
             Behavior::Sequence(ref mut current, xs) => {
                 let mut repr_string = String::new();
                 let mut status = Status::Success;
-                // let mut index = 0;
                 let mut child_repr = None;
 
                 let len = xs.len();
+
+                // Resetting state
+                if *current == len {
+                    *current = 0;
+                }
 
                 while *current < len {
                     let x = &mut xs[*current];
@@ -133,7 +140,13 @@ impl<T, P> Behavior<T, P> {
 
                 let mut repr = DebugRepr::new(
                     "Sequence",
-                    Cursor::Index(*current, Box::new(child_repr.unwrap())),
+                    Cursor::Index(
+                        *current,
+                        Box::new(
+                            child_repr
+                                .expect("Sequence must have a child repr since it's non-empty"),
+                        ),
+                    ),
                     status,
                 );
                 repr.params = Some(repr_string);
