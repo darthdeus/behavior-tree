@@ -27,7 +27,7 @@ fn inc_once(data: &mut Counter, _: &()) -> Status {
 
 #[test]
 fn test_simple_action() {
-    let mut bt: Behavior<Counter, ()> = action!("inc_once", inc_once);
+    let mut bt: Behavior<Counter, ()> = Behavior::Action("inc_once", inc_once);
 
     let mut data = Counter { value: 0 };
 
@@ -42,7 +42,7 @@ fn test_simple_action() {
 
 #[test]
 fn test_simple_sequence() {
-    let mut bt: Behavior<Counter, ()> = sequence![action!("inc_once", inc_once)];
+    let mut bt: Behavior<Counter, ()> = sequence![Behavior::Action("inc_once", inc_once)];
 
     // S
     // |
@@ -131,8 +131,10 @@ fn test_nested_sequence() {
         }
     }
 
-    let mut bt: Behavior<DoubleCounter, ()> =
-        sequence![action!("inc_once_1", inc_x), action!("inc_once_2", inc_y)];
+    let mut bt: Behavior<DoubleCounter, ()> = sequence![
+        Behavior::Action("inc_once_1", inc_x),
+        Behavior::Action("inc_once_2", inc_y)
+    ];
 
     // S
     // |

@@ -22,8 +22,8 @@ pub enum Behavior<T, P> {
 
     // TODO: store cursor here + continue from where left off
     Sequence(usize, Vec<Behavior<T, P>>),
-    Action(String, fn(&mut T, &P) -> Status),
-    ActionSuccess(String, fn(&mut T, &P) -> ()),
+    Action(&'static str, fn(&mut T, &P) -> Status),
+    ActionSuccess(&'static str, fn(&mut T, &P) -> ()),
 
     StatefulAction(String, Box<dyn StatefulAction<T, P>>),
     // StatefulAction(String, fn(&mut T, &P) -> Status),
