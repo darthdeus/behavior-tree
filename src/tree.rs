@@ -1,45 +1,45 @@
 use crate::types::*;
 use tracing::*;
 
-pub trait StatefulAction<T, P> {
-    fn tick(&mut self, data: &mut T, props: &P) -> Status;
+pub trait StatefulAction<T> {
+    fn tick(&mut self, data: &mut T) -> Status;
 }
 
-pub struct BehaviorTree<T, P> {
-    pub tree: Behavior<T, P>,
+pub struct BehaviorTree<T> {
+    pub tree: Behavior<T>,
     pub debug: TreeRepr,
 }
 
-pub enum Behavior<T, P> {
+pub enum Behavior<T> {
     Wait(f64, f64),
     If(
         String,
         // Box<dyn Fn(&mut T, &P) -> bool>,
-        fn(&mut T, &P) -> bool,
-        Box<Behavior<T, P>>,
-        Box<Behavior<T, P>>,
+        fn(&mut T) -> bool,
+        Box<Behavior<T>>,
+        Box<Behavior<T>>,
     ),
 
     // TODO: store cursor here + continue from where left off
-    Sequence(usize, Vec<Behavior<T, P>>),
-    Action(&'static str, fn(&mut T, &P) -> Status),
-    ActionSuccess(&'static str, fn(&mut T, &P) -> ()),
+    Sequence(usize, Vec<Behavior<T>>),
+    Action(&'static str, fn(&mut T) -> Status),
+    ActionSuccess(&'static str, fn(&mut T) -> ()),
 
-    StatefulAction(String, Box<dyn StatefulAction<T, P>>),
+    StatefulAction(String, Box<dyn StatefulAction<T>>),
     // StatefulAction(String, fn(&mut T, &P) -> Status),
 
-    // Select(Vec<Behavior<T, P>>),
+    // Select(Vec<Behavior<T>>),
 
-    // Invert(Box<Behavior<T, P>>),
-    // AlwaysSucceed(Box<Behavior<T, P>>),
-    // Condition(Box<dyn Fn(f64, &mut T, &P) -> bool>, Box<Behavior<T, P>>),
+    // Invert(Box<Behavior<T>>),
+    // AlwaysSucceed(Box<Behavior<T>>),
+    // Condition(Box<dyn Fn(f64, &mut T, &P) -> bool>, Box<Behavior<T>>),
     // WaitForever,
     // Action(T),
     // While(Box<Behavior<T>>, Box<Behavior<T>>),
 }
 
-impl<T, P> Behavior<T, P> {
-    pub fn tick(&mut self, delta: f64, context: &mut T, props: &P) -> (Status, DebugRepr) {
+impl<T> Behavior<T> {
+    pub fn tick(&mut self, delta: f64, context: &mut T) -> (Status, DebugRepr) {
         let _status = match self {
             Behavior::Wait(t_max, ref mut t) => {
                 *t -= delta;
@@ -55,12 +55,12 @@ impl<T, P> Behavior<T, P> {
             }
 
             Behavior::If(s, cond, a, b) => {
-                let c = cond(context, props);
+                let c = cond(context);
 
                 let (status, child_repr) = if c {
-                    a.tick(delta, context, props)
+                    a.tick(delta, context)
                 } else {
-                    b.tick(delta, context, props)
+                    b.tick(delta, context)
                 };
 
                 // let mut repr = DebugRepr::new("If", Cursor::Condition(c), status);
@@ -90,7 +90,7 @@ impl<T, P> Behavior<T, P> {
                 while *current < len {
                     let x = &mut xs[*current];
 
-                    match x.tick(delta, context, props) {
+                    match x.tick(delta, context) {
                         (Status::Success, repr) => {
                             *current += 1;
                             repr_string += "+";
@@ -114,7 +114,7 @@ impl<T, P> Behavior<T, P> {
                 }
 
                 // for (i, x) in xs.iter_mut().enumerate() {
-                //     match x.tick(delta, context, props) {
+                //     match x.tick(delta, context) {
                 //         (Status::Success, repr) => {
                 //             if i < len - 1 {
                 //                 index += 1;
@@ -155,32 +155,32 @@ impl<T, P> Behavior<T, P> {
             }
 
             Behavior::Action(name, action) => {
-                let status = action(context, props);
+                let status = action(context);
                 return (status, DebugRepr::new(name, Cursor::Leaf, status));
             }
             Behavior::ActionSuccess(name, action) => {
-                let _ = action(context, props);
+                let _ = action(context);
                 return (
                     Status::Success,
                     DebugRepr::new(name, Cursor::Leaf, Status::Success),
                 );
             }
             Behavior::StatefulAction(name, action) => {
-                let status = action.tick(context, props);
+                let status = action.tick(context);
                 return (status, DebugRepr::new(name, Cursor::Leaf, status));
-            } // Behavior::Invert(b) => match b.tick(delta, context, props).0 {
+            } // Behavior::Invert(b) => match b.tick(delta, context).0 {
               //     Status::Success => Status::Failure,
               //     Status::Failure => Status::Success,
               //     Status::Running => Status::Running,
               // },
-              // Behavior::AlwaysSucceed(b) => match b.tick(delta, context, props).0 {
+              // Behavior::AlwaysSucceed(b) => match b.tick(delta, context).0 {
               //     Status::Success | Status::Failure => Status::Success,
               //     Status::Running => Status::Running,
               // },
 
               // Behavior::Condition(cond, action) => {
-              //     if cond(delta, context, props) {
-              //         action.tick(delta, context, props).0
+              //     if cond(delta, context) {
+              //         action.tick(delta, context).0
               //     } else {
               //         Status::Failure
               //     }
@@ -190,7 +190,7 @@ impl<T, P> Behavior<T, P> {
               // _ => todo!(),
               //             Behavior::Select(xs) => {
               //                 for x in xs.iter_mut() {
-              //                     match x.tick(delta, context, props).0 {
+              //                     match x.tick(delta, context).0 {
               //                         Status::Success => {
               //                             return (Status::Success, DebugRepr::new("Select", Status::Success))
               //                         }
@@ -233,7 +233,7 @@ impl<T, P> Behavior<T, P> {
     }
 }
 
-impl<T, P> core::fmt::Debug for Behavior<T, P> {
+impl<T> core::fmt::Debug for Behavior<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Behavior::Wait(curr, max) => {
