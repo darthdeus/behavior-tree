@@ -66,7 +66,7 @@ pub struct DebugRepr {
     pub name: String,
     pub params: Option<String>,
     pub status: Status,
-
+    pub bool_override: Option<bool>,
     pub cursor: Cursor,
 }
 
@@ -76,7 +76,15 @@ impl DebugRepr {
             name: name.to_string(),
             cursor,
             status,
+            bool_override: None,
             params: None,
+        }
+    }
+
+    pub fn with_override(self, bool_override: bool) -> Self {
+        Self {
+            bool_override: Some(bool_override),
+            ..self
         }
     }
 }

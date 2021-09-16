@@ -51,7 +51,6 @@ impl<T, P> Behavior<T, P> {
                     Status::Running
                 };
 
-
                 return (status, DebugRepr::new("Wait", Cursor::Leaf, status));
             }
 
@@ -69,7 +68,9 @@ impl<T, P> Behavior<T, P> {
                     "If",
                     Cursor::Index(if c { 0 } else { 1 }, Box::new(child_repr)),
                     status,
-                );
+                )
+                .with_override(c);
+
                 repr.params = Some(format!("true? = {:?} ... str = {:?}", c, s));
                 return (status, repr);
             }
