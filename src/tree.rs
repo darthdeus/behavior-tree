@@ -44,7 +44,7 @@ impl<T> Behavior<T> {
             Behavior::Wait(t_max, ref mut t) => {
                 *t -= delta;
                 let status = if *t < 0.0 {
-                    debug!("timer reset");
+                    trace!("timer reset");
                     *t = *t_max;
                     Status::Success
                 } else {
