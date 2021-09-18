@@ -63,6 +63,10 @@ impl<T> Node<T> {
         })
     }
 
+    pub fn while_single(cond: fn(&T) -> bool, child: Node<T>) -> Node<T> {
+        Self::new(Behavior::While(cond, Box::new(child)))
+    }
+
     pub fn tick(&mut self, delta: f64, context: &mut T) -> (Status, DebugRepr) {
         if self.status == Status::Success || self.status == Status::Failure {
             self.behavior.reset();

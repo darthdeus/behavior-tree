@@ -37,7 +37,7 @@ pub enum Behavior<T> {
     // Condition(Box<dyn Fn(f64, &mut T, &P) -> bool>, Box<Behavior<T>>),
     // WaitForever,
     // Action(T),
-    // While(Box<Behavior<T>>, Box<Behavior<T>>),
+    While(fn(&T) -> bool, Box<Node<T>>),
 }
 
 fn sequence<T>(
@@ -204,8 +204,16 @@ impl<T> Behavior<T> {
             Behavior::StatefulAction(name, action) => {
                 let status = action.tick(context);
                 return (status, DebugRepr::new(name, Cursor::Leaf, status));
-            } // Behavior::Invert(b) => match b.tick(delta, context).0 {
-              //     Status::Success => Status::Failure,
+            }
+
+            Behavior::While(cond, behavior) => {
+                if cond(context) {
+                    return behavior.tick(delta, context);
+                } else {
+                    let status = Status::Failure;
+                    return (status, DebugRepr::new("while", Cursor::Leaf, status));
+                }
+            } //     Status::Success => Status::Failure,
               //     Status::Failure => Status::Success,
               //     Status::Running => Status::Running,
               // },
@@ -283,6 +291,7 @@ impl<T> Behavior<T> {
             Behavior::StatefulAction(name, _) => {
                 TreeRepr::new("StatefulAction", vec![]).with_detail(name.clone())
             }
+            Behavior::While(_, x) => TreeRepr::new("While", vec![x.behavior.to_debug()]),
         }
     }
 }
