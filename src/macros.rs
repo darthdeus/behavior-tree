@@ -16,6 +16,3 @@ macro_rules! sequence {
         Node::sequence(vec![$($x),+])
     }
 }
-
-// #[macro_export]
-// macro_rules! action
