@@ -40,6 +40,7 @@ fn test_nested_sequence() {
             data.x += 1;
             Status::Running
         } else {
+            data.x += 1;
             Status::Success
         }
     }
@@ -49,6 +50,7 @@ fn test_nested_sequence() {
             data.y += 1;
             Status::Running
         } else {
+            data.y += 1;
             Status::Success
         }
     }
@@ -74,21 +76,31 @@ fn test_nested_sequence() {
 
     let (status, debug_repr) = bt.tick(0.0, &mut data);
     assert_eq!(status, Status::Running);
-    assert_eq!(data.x, 1);
+    assert_eq!(data.x, 2);
     assert_eq!(data.y, 1);
     assert_eq!(debug_repr.cursor.index(), 1);
 
     let (status, debug_repr) = bt.tick(0.0, &mut data);
-    assert_eq!(data.x, 1);
-    assert_eq!(data.y, 1);
+    assert_eq!(data.x, 2);
+    assert_eq!(data.y, 2);
     assert_eq!(status, Status::Success);
     assert_eq!(debug_repr.cursor.index(), 2);
 
-    // TODO: check status reset
-    // let (status, debug_repr) = bt.tick(0.0, &mut data);
-    // dbg!(&debug_repr);
-    // assert_eq!(data.x, 1);
-    // assert_eq!(data.y, 0);
-    // assert_eq!(status, Status::Success);
-    // assert_eq!(debug_repr.cursor.index(), 1);
+    let (status, debug_repr) = bt.tick(0.0, &mut data);
+    assert_eq!(data.x, 3);
+    assert_eq!(data.y, 2);
+    assert_eq!(status, Status::Running);
+    assert_eq!(debug_repr.cursor.index(), 0);
+
+    let (status, debug_repr) = bt.tick(0.0, &mut data);
+    assert_eq!(data.x, 4);
+    assert_eq!(data.y, 3);
+    assert_eq!(status, Status::Running);
+    assert_eq!(debug_repr.cursor.index(), 1);
+
+    let (status, debug_repr) = bt.tick(0.0, &mut data);
+    assert_eq!(data.x, 4);
+    assert_eq!(data.y, 4);
+    assert_eq!(status, Status::Success);
+    assert_eq!(debug_repr.cursor.index(), 2);
 }
