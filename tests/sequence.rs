@@ -1,10 +1,10 @@
-use behavior_tree::*;
 use crate::common::*;
+use behavior_tree::*;
 mod common;
 
 #[test]
 fn test_simple_sequence() {
-    let mut bt: Behavior<Counter> = sequence![Node::action("inc_once", inc_once)];
+    let mut bt = Node::sequence(vec![Node::action("inc_once", inc_once)]);
 
     // S
     // |
@@ -48,10 +48,10 @@ fn test_nested_sequence() {
         }
     }
 
-    let mut bt: Behavior<DoubleCounter> = sequence![
+    let mut bt = Node::sequence(vec![
         Node::action("inc_once_1", inc_x),
         Node::action("inc_once_2", inc_y)
-    ];
+    ]);
 
     // S
     // |

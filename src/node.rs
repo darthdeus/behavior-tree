@@ -34,6 +34,10 @@ impl<T> Node<T> {
         )
     }
 
+    pub fn sequence(nodes: Vec<Node<T>>) -> Node<T> {
+        Self::new(Behavior::Sequence(0, nodes))
+    }
+
     pub fn tick(&mut self, delta: f64, context: &mut T) -> (Status, DebugRepr) {
         self.behavior.tick(delta, context)
     }
