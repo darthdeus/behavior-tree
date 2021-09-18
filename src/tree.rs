@@ -14,7 +14,7 @@ pub enum Behavior<T> {
     If(
         String,
         // Box<dyn Fn(&mut T, &P) -> bool>,
-        fn(&mut T) -> bool,
+        fn(&T) -> bool,
         Box<Node<T>>,
         Box<Node<T>>,
     ),
@@ -22,7 +22,7 @@ pub enum Behavior<T> {
     // TODO: store cursor here + continue from where left off
     Sequence(usize, Vec<Node<T>>),
     Action(String, fn(&mut T) -> Status),
-    ActionSuccess(&'static str, fn(&mut T) -> ()),
+    ActionSuccess(String, fn(&mut T) -> ()),
 
     StatefulAction(String, Box<dyn StatefulAction<T>>),
     // StatefulAction(String, fn(&mut T, &P) -> Status),

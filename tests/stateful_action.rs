@@ -27,10 +27,10 @@ fn test_stateful_action() {
     let c1 = Box::new(CounterWrap { value: v1.clone() });
     let c2 = Box::new(CounterWrap { value: v2.clone() });
 
-    let mut bt: Behavior<()> = sequence![
+    let mut bt = Node::sequence(vec![
         Node::stateful_action("inc_x", c1),
         Node::stateful_action("inc_y", c2)
-    ];
+    ]);
 
     //   Player visible?
     //  / \

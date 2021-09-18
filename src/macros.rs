@@ -14,6 +14,9 @@ macro_rules! iff {
 #[macro_export]
 macro_rules! sequence {
     ($($x:expr),+ $(,)?) => {
-        Behavior::Sequence(0, vec![$($x),+])
+        Node::sequence(vec![$($x),+])
     }
 }
+
+// #[macro_export]
+// macro_rules! action
