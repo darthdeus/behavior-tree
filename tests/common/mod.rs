@@ -4,8 +4,9 @@ use behavior_tree::*;
 /// at least once.
 ///
 /// Inspired by https://github.com/danieleades/aspen/blob/master/src/std_nodes/testing.rs
-struct YesTick {
-    ticked: bool,
+#[derive(Default)]
+pub struct YesTick {
+    pub ticked: bool,
 }
 
 impl<T> StatefulAction<T> for YesTick {
@@ -30,7 +31,8 @@ impl Drop for YesTick {
 /// Node that will panic when it ticks.
 ///
 /// Inspired by https://github.com/danieleades/aspen/blob/master/src/std_nodes/testing.rs
-struct NoTick;
+#[derive(Default)]
+pub struct NoTick;
 
 impl<T> StatefulAction<T> for NoTick {
     fn tick(&mut self, _data: &mut T) -> Status {
