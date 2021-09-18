@@ -41,7 +41,7 @@ pub enum Behavior<T> {
 fn sequence<T>(
     delta: f64,
     context: &mut T,
-    is_sequence: bool,
+    _is_sequence: bool,
     current: &mut usize,
     xs: &mut Vec<Behavior<T>>,
 ) -> (Status, DebugRepr) {
@@ -82,6 +82,18 @@ fn sequence<T>(
         }
     }
 
+    let mut repr = DebugRepr::new(
+        "Sequence",
+        Cursor::Index(
+            *current,
+            Box::new(child_repr.expect("Sequence must have a child repr since it's non-empty")),
+        ),
+        status,
+    );
+    repr.params = Some(repr_string);
+    return (status, repr);
+}
+//
     // for (i, x) in xs.iter_mut().enumerate() {
     //     match x.tick(delta, context) {
     //         (Status::Success, repr) => {

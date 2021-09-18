@@ -124,8 +124,8 @@ fn test_stateful_action() {
     assert_eq!(*v2.borrow(), 1);
 
     // let (status, debug_repr) = bt.tick(0.0, &mut data);
+    // assert_eq!(debug_repr.cursor.index(), 0);
     // assert_eq!(status, Status::Running);
-    // assert_eq!(debug_repr.cursor.index(), 1);
 }
 
 #[test]
