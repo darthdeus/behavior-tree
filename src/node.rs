@@ -48,7 +48,7 @@ impl<T> Node<T> {
     pub fn cond(name: &str, cond: fn(&T) -> bool, success: Node<T>, failure: Node<T>) -> Node<T> {
         Self::new_named(
             name.to_owned(),
-            Behavior::If(name.to_owned(), cond, Box::new(success), Box::new(failure)),
+            Behavior::Cond(name.to_owned(), cond, Box::new(success), Box::new(failure)),
         )
     }
 

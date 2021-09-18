@@ -5,13 +5,13 @@ pub trait StatefulAction<T> {
 }
 
 pub struct BehaviorTree<T> {
-    pub tree: Behavior<T>,
+    pub tree: Node<T>,
     pub debug: TreeRepr,
 }
 
 pub enum Behavior<T> {
     Wait(f64, f64),
-    If(
+    Cond(
         String,
         // Box<dyn Fn(&mut T, &P) -> bool>,
         fn(&T) -> bool,
@@ -136,7 +136,7 @@ impl<T> Behavior<T> {
                 return (status, DebugRepr::new("Wait", Cursor::Leaf, status));
             }
 
-            Behavior::If(s, cond, a, b) => {
+            Behavior::Cond(s, cond, a, b) => {
                 let c = cond(context);
 
                 let (status, child_repr) = if c {
@@ -221,8 +221,8 @@ impl<T> Behavior<T> {
             Behavior::Wait(curr, max) => {
                 TreeRepr::new("Wait", vec![]).with_detail(format!("curr={}, max={}", curr, max))
             }
-            Behavior::If(name, _cond, a, b) => {
-                TreeRepr::new("If", vec![a.behavior.to_debug(), b.behavior.to_debug()])
+            Behavior::Cond(name, _cond, a, b) => {
+                TreeRepr::new("Cond", vec![a.behavior.to_debug(), b.behavior.to_debug()])
                     .with_detail(format!("{}", name))
             }
             Behavior::Sequence(_, seq) => {
@@ -251,7 +251,7 @@ impl<T> core::fmt::Debug for Behavior<T> {
             _ => {}
             // Behavior::Invert(_) => todo!(),
             // Behavior::AlwaysSucceed(_) => todo!(),
-            // Behavior::If(_, _, _) => todo!(),
+            // Behavior::Cond(_, _, _) => todo!(),
             // Behavior::Sequence(_) => todo!(),
             // Behavior::Select(_) => todo!(),
             // Behavior::Condition(_, _) => todo!(),
