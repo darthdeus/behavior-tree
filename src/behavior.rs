@@ -23,15 +23,14 @@ pub enum Behavior<T> {
         Box<Node<T>>,
     ),
 
-    // TODO: store cursor here + continue from where left off
     Sequence(usize, Vec<Node<T>>),
+    Select(usize, Vec<Node<T>>),
+
     Action(String, fn(&mut T) -> Status),
     ActionSuccess(String, fn(&mut T) -> ()),
 
     StatefulAction(String, Box<dyn StatefulAction<T>>),
     // StatefulAction(String, fn(&mut T, &P) -> Status),
-
-    // Select(Vec<Behavior<T>>),
 
     // Invert(Box<Behavior<T>>),
     // AlwaysSucceed(Box<Behavior<T>>),
@@ -44,7 +43,7 @@ pub enum Behavior<T> {
 fn sequence<T>(
     delta: f64,
     context: &mut T,
-    _is_sequence: bool,
+    is_sequence: bool,
     current: &mut usize,
     xs: &mut Vec<Node<T>>,
 ) -> (Status, DebugRepr) {
@@ -53,6 +52,12 @@ fn sequence<T>(
     let mut child_repr = None;
 
     let len = xs.len();
+
+    let (positive, negative) = if is_sequence {
+        (Status::Success, Status::Failure)
+    } else {
+        (Status::Failure, Status::Success)
+    };
 
     // Resetting state
     if *current == len {
@@ -65,28 +70,34 @@ fn sequence<T>(
         if x.status == Status::Success || x.status == Status::Failure {
             x.behavior.reset();
         }
+        let (res, repr) = x.tick(delta, context);
 
-        match x.tick(delta, context) {
-            (Status::Success, repr) => {
-                *current += 1;
-                repr_string += "+";
-                child_repr = Some(repr);
-            }
-            (Status::Failure, repr) => {
-                status = Status::Failure;
-                repr_string += "-";
-                child_repr = Some(repr);
-                break;
-                // return (Status::Failure, DebugRepr::new("Sequence", Status::Failure))
-            }
-            (Status::Running, repr) => {
-                status = Status::Running;
-                repr_string += ".";
-                child_repr = Some(repr);
-                break;
-                // return (Status::Running, DebugRepr::new("Sequence", Status::Running))
-            }
+        if res == positive {
+            *current += 1;
+            repr_string += "+";
+            child_repr = Some(repr);
+        } else if res == negative {
+            status = Status::Failure;
+            repr_string += "-";
+            child_repr = Some(repr);
+            break;
+        } else {
+            status = Status::Running;
+            repr_string += ".";
+            child_repr = Some(repr);
+            break;
         }
+
+        // match x.tick(delta, context) {
+        //     (Status::Success, repr) => {
+        //     }
+        //     (Status::Failure, repr) => {
+        //         // return (Status::Failure, DebugRepr::new("Sequence", Status::Failure))
+        //     }
+        //     (Status::Running, repr) => {
+        //         // return (Status::Running, DebugRepr::new("Sequence", Status::Running))
+        //     }
+        // }
     }
 
     let mut repr = DebugRepr::new(
@@ -172,6 +183,10 @@ impl<T> Behavior<T> {
                 return sequence(delta, context, true, current, xs)
             }
 
+            Behavior::Select(ref mut current, xs) => {
+                return sequence(delta, context, false, current, xs)
+            }
+
             Behavior::Action(name, action) => {
                 let status = action(context);
                 return (status, DebugRepr::new(name, Cursor::Leaf, status));
@@ -254,6 +269,10 @@ impl<T> Behavior<T> {
                     .with_detail(name.clone())
             }
             Behavior::Sequence(_, seq) => TreeRepr::new(
+                "Sequence",
+                seq.iter().map(|x| x.behavior.to_debug()).collect(),
+            ),
+            Behavior::Select(_, seq) => TreeRepr::new(
                 "Sequence",
                 seq.iter().map(|x| x.behavior.to_debug()).collect(),
             ),

@@ -4,6 +4,53 @@ mod common;
 
 #[test]
 fn test_simple_sequence() {
+    let mut bt: Node<()> = Node::sequence(vec![
+        Node::action("success", |_| Status::Success),
+        YesTick::action(),
+        YesTick::action(),
+        YesTick::action(),
+        YesTick::action(),
+    ]);
+
+    let (res, debug_repr) = bt.tick(1.0, &mut ());
+    assert_eq!(res, Status::Success);
+    assert_eq!(debug_repr.cursor.index(), 5);
+}
+
+#[test]
+fn test_simple_sequence_inv() {
+    let mut bt: Node<()> = Node::sequence(vec![
+        Node::action("failure", |_| Status::Failure),
+        NoTick::action(),
+        NoTick::action(),
+        NoTick::action(),
+        NoTick::action(),
+    ]);
+
+    let (res, debug_repr) = bt.tick(1.0, &mut ());
+    assert_eq!(res, Status::Failure);
+    assert_eq!(debug_repr.cursor.index(), 0);
+}
+
+#[test]
+fn test_simple_running() {
+    let mut bt: Node<()> = Node::sequence(vec![
+        Node::action("success", |_| Status::Success),
+        YesTick::action(),
+        AlwaysRunning::action(),
+        NoTick::action(),
+    ]);
+
+    // Check that sequence doesn't step over running tasks
+    for _ in 0..10 {
+        let (res, debug_repr) = bt.tick(1.0, &mut ());
+        assert_eq!(res, Status::Running);
+        assert_eq!(debug_repr.cursor.index(), 2);
+    }
+}
+
+#[test]
+fn test_simple_sequence_pingpong() {
     let mut bt = Node::sequence(vec![Node::action("inc_pingpong", inc_pingpong)]);
 
     // S
@@ -57,7 +104,7 @@ fn test_nested_sequence() {
 
     let mut bt = Node::sequence(vec![
         Node::action("inc_once_1", inc_x),
-        Node::action("inc_once_2", inc_y)
+        Node::action("inc_once_2", inc_y),
     ]);
 
     // S

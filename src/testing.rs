@@ -58,3 +58,22 @@ impl<T> StatefulAction<T> for NoTick {
         panic!("Since NoTick should never be ticked, it should also never be reset");
     }
 }
+
+/// Node that always runs.
+pub struct AlwaysRunning;
+
+impl AlwaysRunning {
+    pub fn action<T>() -> Node<T> {
+        Node::action("running", |_| Status::Running)
+    }
+}
+
+// impl<T> StatefulAction<T> for AlwaysRunning {
+//     fn tick(&mut self, _data: &mut T) -> Status {
+//         Status::Running
+//     }
+// 
+//     fn reset(&mut self) {
+//         panic!("AlwaysRunning should never be reset");
+//     }
+// }

@@ -45,6 +45,10 @@ impl<T> Node<T> {
         Self::new(Behavior::Sequence(0, nodes))
     }
 
+    pub fn select(nodes: Vec<Node<T>>) -> Node<T> {
+        Self::new(Behavior::Select(0, nodes))
+    }
+
     pub fn cond(name: &str, cond: fn(&T) -> bool, success: Node<T>, failure: Node<T>) -> Node<T> {
         Self::new_named(
             name.to_owned(),
