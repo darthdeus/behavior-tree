@@ -5,7 +5,7 @@ mod common;
 
 #[test]
 fn test_simple_action() {
-    let mut bt: Behavior<Counter> = Behavior::Action("inc_once", inc_once);
+    let mut bt: Node<Counter> = Node::action("inc_once", inc_once);
 
     let mut data = Counter { value: 0 };
 

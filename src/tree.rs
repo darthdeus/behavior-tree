@@ -15,13 +15,13 @@ pub enum Behavior<T> {
         String,
         // Box<dyn Fn(&mut T, &P) -> bool>,
         fn(&mut T) -> bool,
-        Box<Behavior<T>>,
-        Box<Behavior<T>>,
+        Box<Node<T>>,
+        Box<Node<T>>,
     ),
 
     // TODO: store cursor here + continue from where left off
-    Sequence(usize, Vec<Behavior<T>>),
-    Action(&'static str, fn(&mut T) -> Status),
+    Sequence(usize, Vec<Node<T>>),
+    Action(String, fn(&mut T) -> Status),
     ActionSuccess(&'static str, fn(&mut T) -> ()),
 
     StatefulAction(String, Box<dyn StatefulAction<T>>),
@@ -42,7 +42,7 @@ fn sequence<T>(
     context: &mut T,
     _is_sequence: bool,
     current: &mut usize,
-    xs: &mut Vec<Behavior<T>>,
+    xs: &mut Vec<Node<T>>,
 ) -> (Status, DebugRepr) {
     let mut repr_string = String::new();
     let mut status = Status::Success;
@@ -222,11 +222,11 @@ impl<T> Behavior<T> {
                 TreeRepr::new("Wait", vec![]).with_detail(format!("curr={}, max={}", curr, max))
             }
             Behavior::If(name, _cond, a, b) => {
-                TreeRepr::new("If", vec![a.to_debug(), b.to_debug()])
+                TreeRepr::new("If", vec![a.behavior.to_debug(), b.behavior.to_debug()])
                     .with_detail(format!("{}", name))
             }
             Behavior::Sequence(_, seq) => {
-                TreeRepr::new("Sequence", seq.iter().map(|x| x.to_debug()).collect())
+                TreeRepr::new("Sequence", seq.iter().map(|x| x.behavior.to_debug()).collect())
             }
             Behavior::Action(name, _) => {
                 TreeRepr::new("Action", vec![]).with_detail(format!("{}", name))

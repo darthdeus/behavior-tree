@@ -28,8 +28,8 @@ fn test_stateful_action() {
     let c2 = Box::new(CounterWrap { value: v2.clone() });
 
     let mut bt: Behavior<()> = sequence![
-        Behavior::StatefulAction("inc_x".to_owned(), c1),
-        Behavior::StatefulAction("inc_y".to_owned(), c2)
+        Node::stateful_action("inc_x", c1),
+        Node::stateful_action("inc_y", c2)
     ];
 
     //   Player visible?

@@ -4,7 +4,7 @@ mod common;
 
 #[test]
 fn test_simple_sequence() {
-    let mut bt: Behavior<Counter> = sequence![Behavior::Action("inc_once", inc_once)];
+    let mut bt: Behavior<Counter> = sequence![Node::action("inc_once", inc_once)];
 
     // S
     // |
@@ -49,8 +49,8 @@ fn test_nested_sequence() {
     }
 
     let mut bt: Behavior<DoubleCounter> = sequence![
-        Behavior::Action("inc_once_1", inc_x),
-        Behavior::Action("inc_once_2", inc_y)
+        Node::action("inc_once_1", inc_x),
+        Node::action("inc_once_2", inc_y)
     ];
 
     // S
