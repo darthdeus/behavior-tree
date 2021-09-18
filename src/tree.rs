@@ -38,6 +38,88 @@ pub enum Behavior<T> {
     // While(Box<Behavior<T>>, Box<Behavior<T>>),
 }
 
+fn sequence<T>(
+    delta: f64,
+    context: &mut T,
+    is_sequence: bool,
+    current: &mut usize,
+    xs: &mut Vec<Behavior<T>>,
+) -> (Status, DebugRepr) {
+    let mut repr_string = String::new();
+    let mut status = Status::Success;
+    let mut child_repr = None;
+
+    let len = xs.len();
+
+    // Resetting state
+    if *current == len {
+        *current = 0;
+    }
+
+    while *current < len {
+        let x = &mut xs[*current];
+
+        match x.tick(delta, context) {
+            (Status::Success, repr) => {
+                *current += 1;
+                repr_string += "+";
+                child_repr = Some(repr);
+            }
+            (Status::Failure, repr) => {
+                status = Status::Failure;
+                repr_string += "-";
+                child_repr = Some(repr);
+                break;
+                // return (Status::Failure, DebugRepr::new("Sequence", Status::Failure))
+            }
+            (Status::Running, repr) => {
+                status = Status::Running;
+                repr_string += ".";
+                child_repr = Some(repr);
+                break;
+                // return (Status::Running, DebugRepr::new("Sequence", Status::Running))
+            }
+        }
+    }
+
+    // for (i, x) in xs.iter_mut().enumerate() {
+    //     match x.tick(delta, context) {
+    //         (Status::Success, repr) => {
+    //             if i < len - 1 {
+    //                 index += 1;
+    //             }
+    //             repr_string += "+";
+    //             child_repr = Some(repr);
+    //         }
+    //         (Status::Failure, repr) => {
+    //             status = Status::Failure;
+    //             repr_string += "-";
+    //             child_repr = Some(repr);
+    //             break;
+    //             // return (Status::Failure, DebugRepr::new("Sequence", Status::Failure))
+    //         }
+    //         (Status::Running, repr) => {
+    //             status = Status::Running;
+    //             repr_string += ".";
+    //             child_repr = Some(repr);
+    //             break;
+    //             // return (Status::Running, DebugRepr::new("Sequence", Status::Running))
+    //         }
+    //     }
+    // }
+
+    let mut repr = DebugRepr::new(
+        "Sequence",
+        Cursor::Index(
+            *current,
+            Box::new(child_repr.expect("Sequence must have a child repr since it's non-empty")),
+        ),
+        status,
+    );
+    repr.params = Some(repr_string);
+    return (status, repr);
+}
+
 impl<T> Behavior<T> {
     pub fn tick(&mut self, delta: f64, context: &mut T) -> (Status, DebugRepr) {
         let _status = match self {
@@ -75,84 +157,7 @@ impl<T> Behavior<T> {
                 return (status, repr);
             }
 
-            Behavior::Sequence(ref mut current, xs) => {
-                let mut repr_string = String::new();
-                let mut status = Status::Success;
-                let mut child_repr = None;
-
-                let len = xs.len();
-
-                // Resetting state
-                if *current == len {
-                    *current = 0;
-                }
-
-                while *current < len {
-                    let x = &mut xs[*current];
-
-                    match x.tick(delta, context) {
-                        (Status::Success, repr) => {
-                            *current += 1;
-                            repr_string += "+";
-                            child_repr = Some(repr);
-                        }
-                        (Status::Failure, repr) => {
-                            status = Status::Failure;
-                            repr_string += "-";
-                            child_repr = Some(repr);
-                            break;
-                            // return (Status::Failure, DebugRepr::new("Sequence", Status::Failure))
-                        }
-                        (Status::Running, repr) => {
-                            status = Status::Running;
-                            repr_string += ".";
-                            child_repr = Some(repr);
-                            break;
-                            // return (Status::Running, DebugRepr::new("Sequence", Status::Running))
-                        }
-                    }
-                }
-
-                // for (i, x) in xs.iter_mut().enumerate() {
-                //     match x.tick(delta, context) {
-                //         (Status::Success, repr) => {
-                //             if i < len - 1 {
-                //                 index += 1;
-                //             }
-                //             repr_string += "+";
-                //             child_repr = Some(repr);
-                //         }
-                //         (Status::Failure, repr) => {
-                //             status = Status::Failure;
-                //             repr_string += "-";
-                //             child_repr = Some(repr);
-                //             break;
-                //             // return (Status::Failure, DebugRepr::new("Sequence", Status::Failure))
-                //         }
-                //         (Status::Running, repr) => {
-                //             status = Status::Running;
-                //             repr_string += ".";
-                //             child_repr = Some(repr);
-                //             break;
-                //             // return (Status::Running, DebugRepr::new("Sequence", Status::Running))
-                //         }
-                //     }
-                // }
-
-                let mut repr = DebugRepr::new(
-                    "Sequence",
-                    Cursor::Index(
-                        *current,
-                        Box::new(
-                            child_repr
-                                .expect("Sequence must have a child repr since it's non-empty"),
-                        ),
-                    ),
-                    status,
-                );
-                repr.params = Some(repr_string);
-                return (status, repr);
-            }
+            Behavior::Sequence(ref mut current, xs) => return sequence(delta, context, true, current, xs),
 
             Behavior::Action(name, action) => {
                 let status = action(context);
