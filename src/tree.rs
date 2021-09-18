@@ -108,24 +108,13 @@ fn sequence<T>(
     //     }
     // }
 
-    let mut repr = DebugRepr::new(
-        "Sequence",
-        Cursor::Index(
-            *current,
-            Box::new(child_repr.expect("Sequence must have a child repr since it's non-empty")),
-        ),
-        status,
-    );
-    repr.params = Some(repr_string);
-    return (status, repr);
-}
 
 impl<T> Behavior<T> {
     pub fn tick(&mut self, delta: f64, context: &mut T) -> (Status, DebugRepr) {
         let _status = match self {
             Behavior::Wait(t_max, ref mut t) => {
                 *t -= delta;
-                let status = if *t < 0.0 {
+                let status = if *t <= 0.0 {
                     trace!("timer reset");
                     *t = *t_max;
                     Status::Success
