@@ -10,7 +10,10 @@ pub struct BehaviorTree<T> {
 }
 
 pub enum Behavior<T> {
-    Wait(f64, f64),
+    Wait {
+        curr: f64,
+        max: f64,
+    },
     Cond(
         String,
         // Box<dyn Fn(&mut T, &P) -> bool>,
@@ -93,41 +96,43 @@ fn sequence<T>(
     return (status, repr);
 }
 //
-    // for (i, x) in xs.iter_mut().enumerate() {
-    //     match x.tick(delta, context) {
-    //         (Status::Success, repr) => {
-    //             if i < len - 1 {
-    //                 index += 1;
-    //             }
-    //             repr_string += "+";
-    //             child_repr = Some(repr);
-    //         }
-    //         (Status::Failure, repr) => {
-    //             status = Status::Failure;
-    //             repr_string += "-";
-    //             child_repr = Some(repr);
-    //             break;
-    //             // return (Status::Failure, DebugRepr::new("Sequence", Status::Failure))
-    //         }
-    //         (Status::Running, repr) => {
-    //             status = Status::Running;
-    //             repr_string += ".";
-    //             child_repr = Some(repr);
-    //             break;
-    //             // return (Status::Running, DebugRepr::new("Sequence", Status::Running))
-    //         }
-    //     }
-    // }
-
+// for (i, x) in xs.iter_mut().enumerate() {
+//     match x.tick(delta, context) {
+//         (Status::Success, repr) => {
+//             if i < len - 1 {
+//                 index += 1;
+//             }
+//             repr_string += "+";
+//             child_repr = Some(repr);
+//         }
+//         (Status::Failure, repr) => {
+//             status = Status::Failure;
+//             repr_string += "-";
+//             child_repr = Some(repr);
+//             break;
+//             // return (Status::Failure, DebugRepr::new("Sequence", Status::Failure))
+//         }
+//         (Status::Running, repr) => {
+//             status = Status::Running;
+//             repr_string += ".";
+//             child_repr = Some(repr);
+//             break;
+//             // return (Status::Running, DebugRepr::new("Sequence", Status::Running))
+//         }
+//     }
+// }
 
 impl<T> Behavior<T> {
     pub fn tick(&mut self, delta: f64, context: &mut T) -> (Status, DebugRepr) {
         let _status = match self {
-            Behavior::Wait(t_max, ref mut t) => {
-                *t -= delta;
-                let status = if *t <= 0.0 {
+            Behavior::Wait {
+                ref mut curr,
+                max: _,
+            } => {
+                *curr -= delta;
+                let status = if *curr <= 0.0 {
                     trace!("timer reset");
-                    *t = *t_max;
+                    // *curr = *max;
                     Status::Success
                 } else {
                     Status::Running
@@ -157,7 +162,9 @@ impl<T> Behavior<T> {
                 return (status, repr);
             }
 
-            Behavior::Sequence(ref mut current, xs) => return sequence(delta, context, true, current, xs),
+            Behavior::Sequence(ref mut current, xs) => {
+                return sequence(delta, context, true, current, xs)
+            }
 
             Behavior::Action(name, action) => {
                 let status = action(context);
@@ -216,18 +223,31 @@ impl<T> Behavior<T> {
         // (status, DebugRepr::new("X", status))
     }
 
+    pub fn reset(&mut self) {
+        match self {
+            Behavior::Wait { ref mut curr, max } => {
+                *curr = *max;
+            }
+            Behavior::Sequence(ref mut idx, _) => {
+                *idx = 0;
+            }
+            _ => {}
+        }
+    }
+
     pub fn to_debug(&self) -> TreeRepr {
         match self {
-            Behavior::Wait(curr, max) => {
+            Behavior::Wait { curr, max } => {
                 TreeRepr::new("Wait", vec![]).with_detail(format!("curr={}, max={}", curr, max))
             }
             Behavior::Cond(name, _cond, a, b) => {
                 TreeRepr::new("Cond", vec![a.behavior.to_debug(), b.behavior.to_debug()])
                     .with_detail(format!("{}", name))
             }
-            Behavior::Sequence(_, seq) => {
-                TreeRepr::new("Sequence", seq.iter().map(|x| x.behavior.to_debug()).collect())
-            }
+            Behavior::Sequence(_, seq) => TreeRepr::new(
+                "Sequence",
+                seq.iter().map(|x| x.behavior.to_debug()).collect(),
+            ),
             Behavior::Action(name, _) => {
                 TreeRepr::new("Action", vec![]).with_detail(format!("{}", name))
             }
@@ -244,7 +264,7 @@ impl<T> Behavior<T> {
 impl<T> core::fmt::Debug for Behavior<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Behavior::Wait(curr, max) => {
+            Behavior::Wait{curr, max} => {
                 f.debug_struct("Wait").field("current", curr).field("max", max);
             }
 

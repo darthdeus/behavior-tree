@@ -52,7 +52,20 @@ impl<T> Node<T> {
         )
     }
 
+    pub fn wait(time: f64) -> Node<T> {
+        Self::new(Behavior::Wait {
+            curr: time,
+            max: time,
+        })
+    }
+
     pub fn tick(&mut self, delta: f64, context: &mut T) -> (Status, DebugRepr) {
-        self.behavior.tick(delta, context)
+        if self.status == Status::Success || self.status == Status::Failure {
+            self.behavior.reset();
+        }
+
+        let (status, repr) = self.behavior.tick(delta, context);
+        self.status = status;
+        (status, repr)
     }
 }
