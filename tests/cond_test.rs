@@ -1,6 +1,4 @@
 use behavior_tree::*;
-mod common;
-use crate::common::*;
 
 #[derive(Default)]
     struct Blackboard {
