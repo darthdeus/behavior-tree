@@ -7,8 +7,8 @@ fn test_simple_sequence() {
     let mut bt: Node<()> = Node::sequence(vec![
         Node::action("success", |_| Status::Success),
         YesTick::action(),
-        YesTick::action(),
-        YesTick::action(),
+        Node::action("success", |_| Status::Success),
+        Node::action("success", |_| Status::Success),
         YesTick::action(),
     ]);
 
@@ -31,6 +31,16 @@ fn test_simple_sequence_inv() {
     assert_eq!(res, Status::Failure);
     assert_eq!(debug_repr.cursor.index(), 0);
 }
+
+// Sequence
+// S S R ....... -> R
+// S S S S F ... -> F
+// S S S S S S S -> S
+
+// Select
+// F F R ....... -> R
+// F F F F S ... -> S
+// F F F F F F F -> F
 
 #[test]
 fn test_simple_running() {

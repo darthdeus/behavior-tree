@@ -47,17 +47,17 @@ fn sequence<T>(
     current: &mut usize,
     xs: &mut Vec<Node<T>>,
 ) -> (Status, DebugRepr) {
-    let mut repr_string = String::new();
-    let mut status = Status::Success;
-    let mut child_repr = None;
-
-    let len = xs.len();
-
-    let (positive, negative) = if is_sequence {
+    let (status_positive, status_negative) = if is_sequence {
         (Status::Success, Status::Failure)
     } else {
         (Status::Failure, Status::Success)
     };
+
+    let mut repr_string = String::new();
+    let mut status = status_positive;
+    let mut child_repr = None;
+
+    let len = xs.len();
 
     // Resetting state
     if *current == len {
@@ -72,12 +72,12 @@ fn sequence<T>(
         }
         let (res, repr) = x.tick(delta, context);
 
-        if res == positive {
+        if res == status_positive {
             *current += 1;
             repr_string += "+";
             child_repr = Some(repr);
-        } else if res == negative {
-            status = Status::Failure;
+        } else if res == status_negative {
+            status = status_negative;
             repr_string += "-";
             child_repr = Some(repr);
             break;
