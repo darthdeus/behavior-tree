@@ -1,12 +1,11 @@
 #[macro_export]
-macro_rules! iff {
+macro_rules! cond {
     ($cond:expr, $a:expr, $b:expr $(,)?) => {
-        Behavior::If(
-            stringify!($cond).to_string(),
-            // Box::new($cond),
+        Node::cond(
+            stringify!($cond),
             $cond,
-            Box::new($a),
-            Box::new($b),
+            $a,
+            $b,
         )
     };
 }
