@@ -14,16 +14,16 @@ impl core::default::Default for Status {
 
 #[derive(Clone, Debug)]
 pub struct TreeRepr {
-    pub name: &'static str,
+    pub name: String,
     pub status: Status,
     pub detail: String,
     pub children: Vec<TreeRepr>,
 }
 
 impl TreeRepr {
-    pub fn new(name: &'static str, children: Vec<TreeRepr>) -> Self {
+    pub fn new<T: AsRef<str>>(name: T, children: Vec<TreeRepr>) -> Self {
         Self {
-            name,
+            name: name.as_ref().to_owned(),
             status: Status::Running,
             detail: "".to_owned(),
             children,

@@ -266,34 +266,6 @@ impl<T> Behavior<T> {
             _ => {}
         }
     }
-
-    pub fn to_debug(&self) -> TreeRepr {
-        match self {
-            Behavior::Wait { curr, max } => {
-                TreeRepr::new("Wait", vec![]).with_detail(format!("curr={}, max={}", curr, max))
-            }
-            Behavior::Cond(name, _cond, a, b) => {
-                TreeRepr::new("Cond", vec![a.behavior.to_debug(), b.behavior.to_debug()])
-                    .with_detail(name.clone())
-            }
-            Behavior::Sequence(_, seq) => TreeRepr::new(
-                "Sequence",
-                seq.iter().map(|x| x.behavior.to_debug()).collect(),
-            ),
-            Behavior::Select(_, seq) => TreeRepr::new(
-                "Sequence",
-                seq.iter().map(|x| x.behavior.to_debug()).collect(),
-            ),
-            Behavior::Action(name, _) => TreeRepr::new("Action", vec![]).with_detail(name.clone()),
-            Behavior::ActionSuccess(name, _) => {
-                TreeRepr::new("ActionSuccess", vec![]).with_detail(name.clone())
-            }
-            Behavior::StatefulAction(name, _) => {
-                TreeRepr::new("StatefulAction", vec![]).with_detail(name.clone())
-            }
-            Behavior::While(_, x) => TreeRepr::new("While", vec![x.behavior.to_debug()]),
-        }
-    }
 }
 
 impl<T> core::fmt::Debug for Behavior<T> {

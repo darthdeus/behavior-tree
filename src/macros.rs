@@ -13,6 +13,13 @@ macro_rules! cond {
 #[macro_export]
 macro_rules! sequence {
     ($($x:expr),+ $(,)?) => {
-        Node::sequence(vec![$($x),+])
+        Node::named_sequence(stringify!($($x),+), vec![$($x),+])
+    }
+}
+
+#[macro_export]
+macro_rules! select {
+    ($($x:expr),+ $(,)?) => {
+        Node::named_select(stringify!($($x),+), vec![$($x),+])
     }
 }
