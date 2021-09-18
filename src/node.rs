@@ -71,6 +71,10 @@ impl<T> Node<T> {
         })
     }
 
+    pub fn named_while_single(name: &str, cond: fn(&T) -> bool, child: Node<T>) -> Node<T> {
+        Self::new_named(name.to_owned(), Behavior::While(cond, Box::new(child)))
+    }
+
     pub fn while_single(cond: fn(&T) -> bool, child: Node<T>) -> Node<T> {
         Self::new(Behavior::While(cond, Box::new(child)))
     }
@@ -93,9 +97,14 @@ impl<T> Node<T> {
             Behavior::Cond(name, _cond, a, b) => {
                 TreeRepr::new("Cond", vec![a.to_debug(), b.to_debug()]).with_detail(name.clone())
             }
-            Behavior::Sequence(_, seq) => {
-                TreeRepr::new("Sequence", seq.iter().map(|x| x.to_debug()).collect())
-            }
+            Behavior::Sequence(_, seq) => TreeRepr::new(
+                if let Some(ref name) = self.name {
+                    format!("Sequence {}", name)
+                } else {
+                    "Sequence".to_string()
+                },
+                seq.iter().map(|x| x.to_debug()).collect(),
+            ),
             Behavior::Select(_, seq) => TreeRepr::new(
                 if let Some(ref name) = self.name {
                     format!("Select {}", name)
