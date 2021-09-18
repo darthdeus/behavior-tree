@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 pub trait StatefulAction<T> {
     fn tick(&mut self, data: &mut T) -> Status;
+    fn reset(&mut self);
 }
 
 pub struct BehaviorTree<T> {
@@ -60,6 +61,10 @@ fn sequence<T>(
 
     while *current < len {
         let x = &mut xs[*current];
+
+        if x.status == Status::Success || x.status == Status::Failure {
+            x.behavior.reset();
+        }
 
         match x.tick(delta, context) {
             (Status::Success, repr) => {
@@ -232,6 +237,9 @@ impl<T> Behavior<T> {
             Behavior::Sequence(ref mut idx, _) => {
                 *idx = 0;
             }
+            Behavior::StatefulAction(_name, ref mut state) => {
+                state.reset();
+            }
             _ => {}
         }
     }
@@ -269,6 +277,7 @@ impl<T> core::fmt::Debug for Behavior<T> {
             Behavior::Action(name, _fn) => {
                 f.debug_struct("Action").field("name", name);
             }
+            // Behavior::StatefulAction() => todo!(),
 
             _ => {}
             // Behavior::Invert(_) => todo!(),

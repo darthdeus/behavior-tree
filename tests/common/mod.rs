@@ -13,6 +13,10 @@ impl StatefulAction<()> for Counter {
             Status::Success
         }
     }
+
+    fn reset(&mut self) {
+        self.value = 0;
+    }
 }
 
 pub fn inc_once(data: &mut Counter) -> Status {

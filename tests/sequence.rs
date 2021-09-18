@@ -79,9 +79,10 @@ fn test_nested_sequence() {
     assert_eq!(status, Status::Success);
     assert_eq!(debug_repr.cursor.index(), 2);
 
+    // TODO: check status reset
     // let (status, debug_repr) = bt.tick(0.0, &mut data);
     // dbg!(&debug_repr);
-    // assert_eq!(data.value, 4);
+    // assert_eq!(data.x, 1);
     // assert_eq!(status, Status::Success);
     // assert_eq!(debug_repr.cursor.index(), 1);
 }

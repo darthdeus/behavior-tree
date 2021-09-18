@@ -19,6 +19,10 @@ fn test_stateful_action() {
                 Status::Success
             }
         }
+
+        fn reset(&mut self) {
+            *self.value.borrow_mut() = 0;
+        }
     }
 
     let v1 = Rc::new(RefCell::new(0));
@@ -62,6 +66,7 @@ fn test_stateful_action() {
     assert_eq!(*v1.borrow(), 1);
     assert_eq!(*v2.borrow(), 1);
 
+    // TODO: check stateful action reset
     // let (status, debug_repr) = bt.tick(0.0, &mut data);
     // assert_eq!(debug_repr.cursor.index(), 0);
     // assert_eq!(status, Status::Running);
