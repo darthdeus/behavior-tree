@@ -9,6 +9,12 @@ pub struct YesTick {
     pub ticked: bool,
 }
 
+impl YesTick {
+    pub fn action<T>() -> Node<T> {
+        Node::stateful_action("yes", Box::new(YesTick::default()))
+    }
+}
+
 impl<T> StatefulAction<T> for YesTick {
     fn tick(&mut self, _data: &mut T) -> Status {
         self.ticked = true;
@@ -33,6 +39,12 @@ impl Drop for YesTick {
 /// Inspired by https://github.com/danieleades/aspen/blob/master/src/std_nodes/testing.rs
 #[derive(Default)]
 pub struct NoTick;
+
+impl NoTick {
+    pub fn action<T>() -> Node<T> {
+        Node::stateful_action("no", Box::new(NoTick::default()))
+    }
+}
 
 impl<T> StatefulAction<T> for NoTick {
     fn tick(&mut self, _data: &mut T) -> Status {

@@ -1,12 +1,43 @@
 use behavior_tree::*;
+mod common;
+use crate::common::*;
 
-#[test]
-fn test_if() {
+#[derive(Default)]
     struct Blackboard {
         is_foo: bool,
         result: String,
     }
 
+
+#[test]
+fn test_cond_simple_true() {
+    let mut bt: Node<Blackboard> = Node::cond(
+        "is_foo",
+        |data| data.is_foo,
+        YesTick::action(),
+        NoTick::action(),
+    );
+
+    let mut bb = Blackboard::default();
+    bb.is_foo = true;
+    bt.tick(1.0, &mut bb);
+}
+
+#[test]
+fn test_cond_simple_false() {
+    let mut bt: Node<Blackboard> = Node::cond(
+        "is_foo",
+        |data| data.is_foo,
+        NoTick::action(),
+        YesTick::action(),
+    );
+
+    let mut bb = Blackboard::default();
+    bt.tick(1.0, &mut bb);
+}
+
+#[test]
+fn test_cond() {
     let mut bt: Node<Blackboard> = Node::cond(
         "is_foo",
         |data| data.is_foo,
