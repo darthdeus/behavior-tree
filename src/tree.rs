@@ -1,5 +1,4 @@
-use crate::types::*;
-use tracing::*;
+use crate::prelude::*;
 
 pub trait StatefulAction<T> {
     fn tick(&mut self, data: &mut T) -> Status;
