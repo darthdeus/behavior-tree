@@ -93,7 +93,8 @@ fn sequence<T>(
         status,
     );
     repr.params = Some(repr_string);
-    return (status, repr);
+
+    (status, repr)
 }
 //
 // for (i, x) in xs.iter_mut().enumerate() {
@@ -242,20 +243,18 @@ impl<T> Behavior<T> {
             }
             Behavior::Cond(name, _cond, a, b) => {
                 TreeRepr::new("Cond", vec![a.behavior.to_debug(), b.behavior.to_debug()])
-                    .with_detail(format!("{}", name))
+                    .with_detail(name.clone())
             }
             Behavior::Sequence(_, seq) => TreeRepr::new(
                 "Sequence",
                 seq.iter().map(|x| x.behavior.to_debug()).collect(),
             ),
-            Behavior::Action(name, _) => {
-                TreeRepr::new("Action", vec![]).with_detail(format!("{}", name))
-            }
+            Behavior::Action(name, _) => TreeRepr::new("Action", vec![]).with_detail(name.clone()),
             Behavior::ActionSuccess(name, _) => {
-                TreeRepr::new("ActionSuccess", vec![]).with_detail(format!("{}", name))
+                TreeRepr::new("ActionSuccess", vec![]).with_detail(name.clone())
             }
             Behavior::StatefulAction(name, _) => {
-                TreeRepr::new("StatefulAction", vec![]).with_detail(format!("{}", name))
+                TreeRepr::new("StatefulAction", vec![]).with_detail(name.clone())
             }
         }
     }
@@ -267,6 +266,9 @@ impl<T> core::fmt::Debug for Behavior<T> {
             Behavior::Wait{curr, max} => {
                 f.debug_struct("Wait").field("current", curr).field("max", max);
             }
+            Behavior::Action(name, _fn) => {
+                f.debug_struct("Action").field("name", name);
+            }
 
             _ => {}
             // Behavior::Invert(_) => todo!(),
@@ -275,7 +277,6 @@ impl<T> core::fmt::Debug for Behavior<T> {
             // Behavior::Sequence(_) => todo!(),
             // Behavior::Select(_) => todo!(),
             // Behavior::Condition(_, _) => todo!(),
-            // Behavior::Action(_) => todo!(),
             // Behavior::ActionSuccess(_) => todo!(),
             // Behavior::StatefulAction(_) => todo!(),
         };
