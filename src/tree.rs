@@ -163,6 +163,7 @@ impl<T> Behavior<T> {
                 let status = action(context);
                 return (status, DebugRepr::new(name, Cursor::Leaf, status));
             }
+
             Behavior::ActionSuccess(name, action) => {
                 let _ = action(context);
                 return (
@@ -170,6 +171,8 @@ impl<T> Behavior<T> {
                     DebugRepr::new(name, Cursor::Leaf, Status::Success),
                 );
             }
+
+            // TODO: state reset?
             Behavior::StatefulAction(name, action) => {
                 let status = action.tick(context);
                 return (status, DebugRepr::new(name, Cursor::Leaf, status));
