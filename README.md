@@ -1,7 +1,7 @@
 # `behavior-tree` for Rust!
 
 [![Crates.io](https://img.shields.io/crates/v/behavior-tree)](https://crates.io/crates/behavior-tree)
-[![Crates.io (latest)](https://img.shields.io/crates/dv/behavior-tree)](https://crates.io/crates/behavior-tree)
+[![Crates.io (latest)](https://img.shields.io/crates/d/behavior-tree)](https://crates.io/crates/behavior-tree)
 [![Crates.io](https://img.shields.io/crates/l/behavior-tree)](https://crates.io/crates/behavior-tree)
 [![docs.rs](https://img.shields.io/docsrs/behavior-tree)](https://docs.rs/behavior-tree)
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/darthdeus/behavior-tree/Rust)](https://github.com/darthdeus/behavior-tree/actions)
