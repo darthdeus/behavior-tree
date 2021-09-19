@@ -120,7 +120,9 @@ impl<T> Node<T> {
             Behavior::StatefulAction(name, _) => {
                 TreeRepr::new("StatefulAction", vec![]).with_detail(name.clone())
             }
-            Behavior::While(_, x) => TreeRepr::new("While", vec![x.to_debug()]),
+            // Behavior::While(_, x) => TreeRepr::new("While", vec![x.to_debug()]),
+            // TODO: add to detail
+            Behavior::While(_, x) => x.to_debug()
         }
     }
 }
