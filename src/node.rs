@@ -100,6 +100,20 @@ impl<T> Node<T> {
         (status, repr)
     }
 
+    pub fn children(&self) -> Vec<&Node<T>> {
+        match self.behavior {
+            Behavior::Wait { .. } => vec![],
+            _ => vec![],
+            // Behavior::Cond(_, _, positive, negative) => vec![positive, negative],
+            Behavior::Sequence(_, ref seq) => seq.iter().collect(),
+            Behavior::Select(_, _) => todo!(),
+            Behavior::Action(_, _) => todo!(),
+            Behavior::ActionSuccess(_, _) => todo!(),
+            Behavior::StatefulAction(_, _) => todo!(),
+            Behavior::While(_, _) => todo!(),
+        }
+    }
+
     pub fn to_debug(&self) -> TreeRepr {
         let mut repr = match &self.collapse_as {
             Some(collapse_text) => TreeRepr::new(collapse_text, vec![]),
