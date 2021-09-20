@@ -83,10 +83,11 @@ impl<T> Node<T> {
     }
 
     pub fn collapse(self, desc: &str) -> Node<T> {
-        Self {
-            collapse_as: Some(desc.to_owned()),
-            ..self
-        }
+        self
+        // Self {
+        //     collapse_as: Some(desc.to_owned()),
+        //     ..self
+        // }
     }
 
     pub fn tick(&mut self, delta: f64, context: &mut T) -> (Status, DebugRepr) {
