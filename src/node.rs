@@ -100,7 +100,7 @@ impl<T> Node<T> {
     }
 
     pub fn to_debug(&self) -> TreeRepr {
-        match &self.collapse_as {
+        let mut repr = match &self.collapse_as {
             Some(collapse_text) => TreeRepr::new(collapse_text, vec![]),
             None => {
                 match &self.behavior {
@@ -140,6 +140,9 @@ impl<T> Node<T> {
                     Behavior::While(_, x) => x.to_debug(),
                 }
             }
-        }
+        };
+
+        repr.status = self.status;
+        repr
     }
 }
