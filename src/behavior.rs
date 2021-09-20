@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use std::{cell::RefCell, rc::Rc};
 
 pub trait StatefulAction<T> {
     fn tick(&mut self, data: &mut T) -> Status;
@@ -17,10 +18,10 @@ pub enum Behavior<T> {
     },
     Cond(
         String,
-        // Box<dyn Fn(&mut T, &P) -> bool>,
+        // Rc<dyn Fn(&mut T, &P) -> bool>,
         fn(&T) -> bool,
-        Box<Node<T>>,
-        Box<Node<T>>,
+        Rc<RefCell<Node<T>>>,
+        Rc<RefCell<Node<T>>>,
     ),
 
     Sequence(usize, Vec<Node<T>>),
@@ -32,12 +33,12 @@ pub enum Behavior<T> {
     StatefulAction(String, Box<dyn StatefulAction<T>>),
     // StatefulAction(String, fn(&mut T, &P) -> Status),
 
-    // Invert(Box<Behavior<T>>),
-    // AlwaysSucceed(Box<Behavior<T>>),
-    // Condition(Box<dyn Fn(f64, &mut T, &P) -> bool>, Box<Behavior<T>>),
+    // Invert(Rc<Behavior<T>>),
+    // AlwaysSucceed(Rc<Behavior<T>>),
+    // Condition(Rc<dyn Fn(f64, &mut T, &P) -> bool>, Rc<Behavior<T>>),
     // WaitForever,
     // Action(T),
-    While(fn(&T) -> bool, Box<Node<T>>),
+    While(fn(&T) -> bool, Rc<RefCell<Node<T>>>),
 }
 
 fn sequence<T>(
@@ -162,9 +163,9 @@ impl<T> Behavior<T> {
                 let c = cond(context);
 
                 let (status, child_repr) = if c {
-                    a.tick(delta, context)
+                    a.borrow_mut().tick(delta, context)
                 } else {
-                    b.tick(delta, context)
+                    b.borrow_mut().tick(delta, context)
                 };
 
                 // let mut repr = DebugRepr::new("If", Cursor::Condition(c), status);
@@ -208,7 +209,7 @@ impl<T> Behavior<T> {
 
             Behavior::While(cond, behavior) => {
                 if cond(context) {
-                    return behavior.tick(delta, context);
+                    return behavior.borrow_mut().tick(delta, context);
                 } else {
                     let status = Status::Failure;
                     return (status, DebugRepr::new("while", Cursor::Leaf, status));

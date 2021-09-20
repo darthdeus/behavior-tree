@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use std::{cell::RefCell, rc::Rc};
 
 pub struct Node<T> {
     pub name: Option<String>,
@@ -63,7 +64,12 @@ impl<T> Node<T> {
     pub fn cond(name: &str, cond: fn(&T) -> bool, success: Node<T>, failure: Node<T>) -> Node<T> {
         Self::new_named(
             name.to_owned(),
-            Behavior::Cond(name.to_owned(), cond, Box::new(success), Box::new(failure)),
+            Behavior::Cond(
+                name.to_owned(),
+                cond,
+                Rc::new(RefCell::new(success)),
+                Rc::new(RefCell::new(failure)),
+            ),
         )
     }
 
@@ -75,15 +81,19 @@ impl<T> Node<T> {
     }
 
     pub fn named_while_single(name: &str, cond: fn(&T) -> bool, child: Node<T>) -> Node<T> {
-        Self::new_named(name.to_owned(), Behavior::While(cond, Box::new(child)))
+        Self::new_named(
+            name.to_owned(),
+            Behavior::While(cond, Rc::new(RefCell::new(child))),
+        )
     }
 
     pub fn while_single(cond: fn(&T) -> bool, child: Node<T>) -> Node<T> {
-        Self::new(Behavior::While(cond, Box::new(child)))
+        Self::new(Behavior::While(cond, Rc::new(RefCell::new(child))))
     }
 
-    pub fn collapse(self, desc: &str) -> Node<T> {
+    pub fn collapse(self, _desc: &str) -> Node<T> {
         self
+        // TODO: re-enable once behavior-tree-egui catches up
         // Self {
         //     collapse_as: Some(desc.to_owned()),
         //     ..self
@@ -122,7 +132,7 @@ impl<T> Node<T> {
                     Behavior::Wait { curr, max } => TreeRepr::new("Wait", vec![])
                         .with_detail(format!("curr={}, max={}", curr, max)),
                     Behavior::Cond(name, _cond, a, b) => {
-                        TreeRepr::new("Cond", vec![a.to_debug(), b.to_debug()])
+                        TreeRepr::new("Cond", vec![a.borrow().to_debug(), b.borrow().to_debug()])
                             .with_detail(name.clone())
                     }
                     Behavior::Sequence(_, seq) => TreeRepr::new(
@@ -152,7 +162,7 @@ impl<T> Node<T> {
                     }
                     // Behavior::While(_, x) => TreeRepr::new("While", vec![x.to_debug()]),
                     // TODO: add to detail
-                    Behavior::While(_, x) => x.to_debug(),
+                    Behavior::While(_, x) => x.borrow().to_debug(),
                 }
             }
         };
