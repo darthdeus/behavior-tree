@@ -102,6 +102,7 @@ impl<T> Node<T> {
 
     pub fn tick(&mut self, delta: f64, context: &mut T) -> (Status, DebugRepr) {
         if self.status == Status::Success || self.status == Status::Failure {
+            self.status = Status::Initialized;
             self.behavior.reset();
         }
 

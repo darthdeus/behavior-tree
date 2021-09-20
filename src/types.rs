@@ -1,14 +1,14 @@
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Status {
+    Initialized,
     Success,
     Failure,
     Running,
-    // Initialized,
 }
 
 impl core::default::Default for Status {
     fn default() -> Self {
-        Self::Running
+        Self::Initialized
     }
 }
 
