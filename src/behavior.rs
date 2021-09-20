@@ -46,7 +46,7 @@ fn sequence<T>(
     context: &mut T,
     is_sequence: bool,
     current: &mut usize,
-    xs: &mut Vec<Node<T>>,
+    xs: &mut Vec<Rc<RefCell<Node<T>>>>,
 ) -> (Status, DebugRepr) {
     let (status_positive, status_negative) = if is_sequence {
         (Status::Success, Status::Failure)
@@ -66,7 +66,7 @@ fn sequence<T>(
     }
 
     while *current < len {
-        let x = &mut xs[*current];
+        let mut x = xs[*current].borrow_mut();
 
         if x.status == Status::Success || x.status == Status::Failure {
             x.behavior.reset();

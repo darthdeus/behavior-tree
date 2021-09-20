@@ -46,19 +46,49 @@ impl<T> Node<T> {
     }
 
     pub fn sequence(nodes: Vec<Node<T>>) -> Node<T> {
-        Self::new(Behavior::Sequence(0, nodes))
+        Self::new(Behavior::Sequence(
+            0,
+            nodes
+                .into_iter()
+                .map(|node| Rc::new(RefCell::new(node)))
+                .collect(),
+        ))
     }
 
     pub fn named_sequence(name: &str, nodes: Vec<Node<T>>) -> Node<T> {
-        Self::new_named(name.to_owned(), Behavior::Sequence(0, nodes))
+        Self::new_named(
+            name.to_owned(),
+            Behavior::Sequence(
+                0,
+                nodes
+                    .into_iter()
+                    .map(|node| Rc::new(RefCell::new(node)))
+                    .collect(),
+            ),
+        )
     }
 
     pub fn select(nodes: Vec<Node<T>>) -> Node<T> {
-        Self::new(Behavior::Select(0, nodes))
+        Self::new(Behavior::Select(
+            0,
+            nodes
+                .into_iter()
+                .map(|node| Rc::new(RefCell::new(node)))
+                .collect(),
+        ))
     }
 
     pub fn named_select(name: &str, nodes: Vec<Node<T>>) -> Node<T> {
-        Self::new_named(name.to_owned(), Behavior::Select(0, nodes))
+        Self::new_named(
+            name.to_owned(),
+            Behavior::Select(
+                0,
+                nodes
+                    .into_iter()
+                    .map(|node| Rc::new(RefCell::new(node)))
+                    .collect(),
+            ),
+        )
     }
 
     pub fn cond(name: &str, cond: fn(&T) -> bool, success: Node<T>, failure: Node<T>) -> Node<T> {
@@ -112,9 +142,9 @@ impl<T> Node<T> {
     }
 
     pub fn children(&self) -> Vec<Rc<RefCell<Node<T>>>> {
-        match self.behavior {
+        match &self.behavior {
             Behavior::Wait { .. } => vec![],
-            Behavior::Cond(_, _, positive, negative) => vec![positive, negative],
+            Behavior::Cond(_, _, positive, negative) => vec![positive.clone(), negative.clone()],
             _ => vec![],
             Behavior::Sequence(_, ref seq) => seq.clone(),
             Behavior::Select(_, _) => todo!(),
