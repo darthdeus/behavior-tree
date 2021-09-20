@@ -111,12 +111,12 @@ impl<T> Node<T> {
         (status, repr)
     }
 
-    pub fn children(&self) -> Vec<&Node<T>> {
+    pub fn children(&self) -> Vec<Rc<RefCell<Node<T>>>> {
         match self.behavior {
             Behavior::Wait { .. } => vec![],
+            Behavior::Cond(_, _, positive, negative) => vec![positive, negative],
             _ => vec![],
-            // Behavior::Cond(_, _, positive, negative) => vec![positive, negative],
-            Behavior::Sequence(_, ref seq) => seq.iter().collect(),
+            Behavior::Sequence(_, ref seq) => seq.clone(),
             Behavior::Select(_, _) => todo!(),
             Behavior::Action(_, _) => todo!(),
             Behavior::ActionSuccess(_, _) => todo!(),
@@ -142,7 +142,7 @@ impl<T> Node<T> {
                         } else {
                             "Sequence".to_string()
                         },
-                        seq.iter().map(|x| x.to_debug()).collect(),
+                        seq.iter().map(|x| x.borrow().to_debug()).collect(),
                     ),
                     Behavior::Select(_, seq) => TreeRepr::new(
                         if let Some(ref name) = self.name {
@@ -150,7 +150,7 @@ impl<T> Node<T> {
                         } else {
                             "Select".to_string()
                         },
-                        seq.iter().map(|x| x.to_debug()).collect(),
+                        seq.iter().map(|x| x.borrow().to_debug()).collect(),
                     ),
                     Behavior::Action(name, _) => {
                         TreeRepr::new("Action", vec![]).with_detail(name.clone())

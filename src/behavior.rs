@@ -24,8 +24,8 @@ pub enum Behavior<T> {
         Rc<RefCell<Node<T>>>,
     ),
 
-    Sequence(usize, Vec<Node<T>>),
-    Select(usize, Vec<Node<T>>),
+    Sequence(usize, Vec<Rc<RefCell<Node<T>>>>),
+    Select(usize, Vec<Rc<RefCell<Node<T>>>>),
 
     Action(String, fn(&mut T) -> Status),
     ActionSuccess(String, fn(&mut T) -> ()),
