@@ -13,7 +13,7 @@ impl<T> Node<T> {
         Node {
             name: None,
             behavior,
-            status: Status::Running,
+            status: Status::Initialized,
             collapse_as: None,
         }
     }
@@ -22,7 +22,7 @@ impl<T> Node<T> {
         Node {
             name: Some(name),
             behavior,
-            status: Status::Running,
+            status: Status::Initialized,
             collapse_as: None,
         }
     }

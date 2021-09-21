@@ -12,6 +12,8 @@ fn test_simple_sequence() {
         YesTick::action(),
     ]);
 
+    assert_eq!(bt.status, Status::Initialized);
+
     let (res, debug_repr) = bt.tick(1.0, &mut ());
     assert_eq!(res, Status::Success);
     assert_eq!(debug_repr.cursor.index(), 5);
