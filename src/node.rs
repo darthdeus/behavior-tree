@@ -149,13 +149,42 @@ impl<T> Node<T> {
         match &self.behavior {
             Behavior::Wait { .. } => vec![],
             Behavior::Cond(_, _, positive, negative) => vec![positive.clone(), negative.clone()],
-            _ => vec![],
             Behavior::Sequence(_, ref seq) => seq.clone(),
-            Behavior::Select(_, _) => todo!(),
-            Behavior::Action(_, _) => todo!(),
-            Behavior::ActionSuccess(_, _) => todo!(),
-            Behavior::StatefulAction(_, _) => todo!(),
-            Behavior::While(_, _) => todo!(),
+            Behavior::Select(_, ref seq) => seq.clone(),
+            Behavior::Action(_, _) => vec![],
+            Behavior::ActionSuccess(_, _) => vec![],
+            Behavior::StatefulAction(_, _) => vec![],
+            Behavior::While(_, item) => vec![item.clone()],
+        }
+    }
+
+    pub fn name(&self) -> String {
+        match &self.collapse_as {
+            Some(collapse_text) => collapse_text.clone(),
+            None => {
+                match &self.behavior {
+                    Behavior::Wait { curr, max } => format!("Wait {:.2}/{:.2}", curr, max),
+                    Behavior::Cond(name, _cond, _a, _b) => {
+                        format!("Cond {}", name)
+                        // TreeRepr::new("Cond", vec![a.borrow().to_debug(), b.borrow().to_debug()])
+                        //     .with_detail(name.clone())
+                    }
+                    Behavior::Sequence(_, _seq) => "Sequence".to_string(),
+                    // if let Some(ref name) = self.name {
+                    //     format!("Sequence {}", name)
+                    // } else {
+                    //     "Sequence".to_string()
+                    // },
+                    // seq.iter().map(|x| x.borrow().to_debug()).collect(),
+                    Behavior::Select(_, _seq) => "Select".to_string(),
+                    Behavior::Action(name, _) => format!("Action {}", name),
+                    Behavior::ActionSuccess(name, _) => format!("ActionSuccess {}", name),
+                    Behavior::StatefulAction(name, _) => format!("StatefulAction {}", name),
+                    // Behavior::While(_, x) => TreeRepr::new("While", vec![x.to_debug()]),
+                    // TODO: add to detail
+                    Behavior::While(_, _x) => "While".to_string(),
+                }
+            }
         }
     }
 
