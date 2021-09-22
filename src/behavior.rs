@@ -77,6 +77,7 @@ fn sequence<T>(
             *current = i;
         }
     }
+
     // Resetting state
     if *current == len {
         *current = 0;
