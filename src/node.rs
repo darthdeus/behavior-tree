@@ -117,9 +117,9 @@ impl<T> Node<T> {
         )
     }
 
-    pub fn while_single(cond: fn(&T) -> bool, child: Node<T>) -> Node<T> {
-        Self::new(Behavior::While(cond, Rc::new(RefCell::new(child))))
-    }
+    // pub fn while_single(cond: fn(&T) -> bool, child: Node<T>) -> Node<T> {
+    //     Self::new(Behavior::While(cond, Rc::new(RefCell::new(child))))
+    // }
 
     pub fn collapse(self, _desc: &str) -> Node<T> {
         self
@@ -164,11 +164,9 @@ impl<T> Node<T> {
             None => {
                 match &self.behavior {
                     Behavior::Wait { curr, max } => format!("Wait {:.2}/{:.2}", curr, max),
-                    Behavior::Cond(name, _cond, _a, _b) => {
-                        format!("Cond {}", name)
-                        // TreeRepr::new("Cond", vec![a.borrow().to_debug(), b.borrow().to_debug()])
-                        //     .with_detail(name.clone())
-                    }
+                    Behavior::Cond(name, _cond, _a, _b) => format!("Cond {}", name),
+                    // TreeRepr::new("Cond", vec![a.borrow().to_debug(), b.borrow().to_debug()])
+                    //     .with_detail(name.clone())
                     Behavior::Sequence(_, _seq) => "Sequence".to_string(),
                     // if let Some(ref name) = self.name {
                     //     format!("Sequence {}", name)

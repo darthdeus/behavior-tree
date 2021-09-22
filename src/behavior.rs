@@ -283,6 +283,8 @@ impl<T> Behavior<T> {
             Behavior::StatefulAction(_name, ref mut state) => {
                 state.reset();
             }
+
+            Behavior::While(_, node) => node.borrow_mut().reset(),
             _ => {}
         }
     }
