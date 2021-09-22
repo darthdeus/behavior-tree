@@ -1,10 +1,10 @@
 use behavior_tree::*;
 
-pub struct Counter {
+pub struct EvenCounter {
     pub value: i32,
 }
 
-impl StatefulAction<()> for Counter {
+impl StatefulAction<()> for EvenCounter {
     fn tick(&mut self, _data: &mut ()) -> Status {
         if self.value == 0 {
             self.value += 1;
@@ -19,7 +19,7 @@ impl StatefulAction<()> for Counter {
     }
 }
 
-pub fn inc_pingpong(data: &mut Counter) -> Status {
+pub fn inc_pingpong(data: &mut EvenCounter) -> Status {
     if data.value % 2 == 0 {
         data.value += 1;
         Status::Running

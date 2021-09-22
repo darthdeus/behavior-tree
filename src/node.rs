@@ -121,13 +121,13 @@ impl<T> Node<T> {
     //     Self::new(Behavior::While(cond, Rc::new(RefCell::new(child))))
     // }
 
-    pub fn collapse(self, _desc: &str) -> Node<T> {
-        self
+    pub fn collapse(self, desc: &str) -> Node<T> {
+        // self
         // TODO: re-enable once behavior-tree-egui catches up
-        // Self {
-        //     collapse_as: Some(desc.to_owned()),
-        //     ..self
-        // }
+        Self {
+            collapse_as: Some(desc.to_owned()),
+            ..self
+        }
     }
 
     pub fn reset(&mut self) {
@@ -180,7 +180,9 @@ impl<T> Node<T> {
                     Behavior::StatefulAction(name, _) => format!("StatefulAction {}", name),
                     // Behavior::While(_, x) => TreeRepr::new("While", vec![x.to_debug()]),
                     // TODO: add to detail
-                    Behavior::While(_, _x) => "While".to_string(),
+                    Behavior::While(_, _x) => {
+                        format!("While {}", self.name.as_ref().expect("While must have a name"))
+                    }
                 }
             }
         }

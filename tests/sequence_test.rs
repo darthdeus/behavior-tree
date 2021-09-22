@@ -93,7 +93,7 @@ fn test_simple_sequence_pingpong() {
     // |
     // A
 
-    let mut data = Counter { value: 0 };
+    let mut data = EvenCounter { value: 0 };
 
     let (status, debug_repr) = bt.tick(0.0, &mut data);
     assert_eq!(status, Status::Running);

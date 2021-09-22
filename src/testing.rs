@@ -1,6 +1,8 @@
 //! Nodes in this module are intended for testing. While they're being
 //! used to internally test this library they could also prove to be useful
 //! for testing custom node types in user code.
+use std::{cell::RefCell, rc::Rc};
+
 use crate::prelude::*;
 
 /// Node that will panic upon being dropped if it hasn't ticked
@@ -68,11 +70,32 @@ impl AlwaysRunning {
     }
 }
 
+/// Node that always returns a given status when ticked, but exposes the status
+/// to be modified from the outside.
+pub struct ConstAction {
+    pub return_status: Rc<RefCell<Status>>,
+}
+
+impl ConstAction {
+    pub fn new(status: Status) -> Self {
+        Self {
+            return_status: Rc::new(RefCell::new(status)),
+        }
+    }
+}
+
+impl<T> StatefulAction<T> for ConstAction {
+    fn tick(&mut self, _data: &mut T) -> Status {
+        *self.return_status.borrow()
+    }
+
+    fn reset(&mut self) {}
+}
 // impl<T> StatefulAction<T> for AlwaysRunning {
 //     fn tick(&mut self, _data: &mut T) -> Status {
 //         Status::Running
 //     }
-// 
+//
 //     fn reset(&mut self) {
 //         panic!("AlwaysRunning should never be reset");
 //     }

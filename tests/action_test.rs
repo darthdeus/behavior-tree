@@ -5,9 +5,9 @@ mod common;
 
 #[test]
 fn test_simple_action() {
-    let mut bt: Node<Counter> = Node::action("inc_pingpong", inc_pingpong);
+    let mut bt: Node<EvenCounter> = Node::action("inc_pingpong", inc_pingpong);
 
-    let mut data = Counter { value: 0 };
+    let mut data = EvenCounter { value: 0 };
 
     let (status, _) = bt.tick(0.0, &mut data);
     assert_eq!(status, Status::Running);

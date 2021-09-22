@@ -1,3 +1,5 @@
+use std::{cell::RefCell, rc::Rc};
+
 use behavior_tree::*;
 
 #[test]
@@ -83,4 +85,52 @@ fn test_simple_select_fail() {
     let (res, debug_repr) = bt.tick(1.0, &mut ());
     assert_eq!(res, Status::Failure);
     assert_eq!(debug_repr.cursor.index(), 5);
+}
+
+#[test]
+fn test_condition_recheck() {
+    #[derive(Default)]
+    struct Counter {
+        value: i32,
+    }
+
+    impl<T> StatefulAction<T> for Counter {
+        fn tick(&mut self, _data: &mut T) -> Status {
+            self.value += 1;
+            return Status::Success;
+        }
+
+        fn reset(&mut self) {
+            self.value = 0;
+        }
+    }
+
+    let const_status = Rc::new(RefCell::new(Status::Failure));
+
+    let mut bt: Node<()> = Node::select(vec![
+        Node::stateful_action(
+            "const",
+            Box::new(ConstAction {
+                return_status: const_status.clone(),
+            }),
+        ),
+        Node::stateful_action("counter", Box::new(Counter::default())),
+        AlwaysRunning::action(),
+    ]);
+
+    let (status, debug_repr) = bt.tick(1.0, &mut ());
+    assert_eq!(status, Status::Success);
+    assert_eq!(debug_repr.cursor.index(), 1);
+
+    *const_status.borrow_mut() = Status::Success;
+
+    let (status, debug_repr) = bt.tick(1.0, &mut ());
+    assert_eq!(status, Status::Success);
+    assert_eq!(debug_repr.cursor.index(), 0);
+
+    *const_status.borrow_mut() = Status::Running;
+
+    let (status, debug_repr) = bt.tick(1.0, &mut ());
+    assert_eq!(status, Status::Running);
+    assert_eq!(debug_repr.cursor.index(), 0);
 }
