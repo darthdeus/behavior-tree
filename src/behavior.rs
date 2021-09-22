@@ -18,7 +18,7 @@ impl<T> BehaviorTree<T> {
 
         Self {
             tree: root.clone(),
-            debug
+            debug,
         }
     }
 }
@@ -72,6 +72,11 @@ fn sequence<T>(
 
     let len = xs.len();
 
+    for i in 0..*current {
+        if xs[i].borrow_mut().recheck_condition(context, is_sequence) {
+            *current = i;
+        }
+    }
     // Resetting state
     if *current == len {
         *current = 0;
@@ -81,6 +86,8 @@ fn sequence<T>(
         let mut x = xs[*current].borrow_mut();
 
         if x.status == Status::Success || x.status == Status::Failure {
+            // *current += 1;
+            // continue;
             x.reset();
         }
         let (res, repr) = x.tick(delta, context);

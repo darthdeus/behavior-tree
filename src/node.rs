@@ -244,4 +244,20 @@ impl<T> Node<T> {
         repr.status = self.status;
         repr
     }
+
+    pub fn recheck_condition(&mut self, context: &T, is_sequence: bool) -> bool {
+        match &self.behavior {
+            Behavior::While(cond, _) => {
+                cond(context) != is_sequence
+            }
+            _ => false,
+            // Behavior::Sequence(_, _) => todo!(),
+            // Behavior::Select(_, _) => todo!(),
+            // Behavior::Action(_, _) => todo!(),
+            // Behavior::ActionSuccess(_, _) => todo!(),
+            // Behavior::StatefulAction(_, _) => todo!(),
+            // Behavior::Wait { curr, max } => todo!(),
+            // Behavior::Cond(_, _, _, _) => todo!(),
+        }
+    }
 }
