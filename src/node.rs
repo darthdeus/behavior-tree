@@ -130,10 +130,14 @@ impl<T> Node<T> {
         // }
     }
 
+    pub fn reset(&mut self) {
+        self.status = Status::Initialized;
+        self.behavior.reset();
+    }
+
     pub fn tick(&mut self, delta: f64, context: &mut T) -> (Status, DebugRepr) {
         if self.status == Status::Success || self.status == Status::Failure {
-            self.status = Status::Initialized;
-            self.behavior.reset();
+            self.reset();
         }
 
         let (status, repr) = self.behavior.tick(delta, context);

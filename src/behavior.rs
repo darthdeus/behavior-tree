@@ -69,7 +69,7 @@ fn sequence<T>(
         let mut x = xs[*current].borrow_mut();
 
         if x.status == Status::Success || x.status == Status::Failure {
-            x.behavior.reset();
+            x.reset();
         }
         let (res, repr) = x.tick(delta, context);
 
@@ -149,8 +149,6 @@ impl<T> Behavior<T> {
             } => {
                 *curr -= delta;
                 let status = if *curr <= 0.0 {
-                    trace!("timer reset");
-                    // *curr = *max;
                     Status::Success
                 } else {
                     Status::Running
@@ -258,8 +256,17 @@ impl<T> Behavior<T> {
             Behavior::Wait { ref mut curr, max } => {
                 *curr = *max;
             }
-            Behavior::Sequence(ref mut idx, _) => {
+            Behavior::Sequence(ref mut idx, nodes) => {
                 *idx = 0;
+                for node in nodes.iter_mut() {
+                    node.borrow_mut().reset();
+                }
+            }
+            Behavior::Select(ref mut idx, nodes) => {
+                *idx = 0;
+                for node in nodes.iter_mut() {
+                    node.borrow_mut().reset();
+                }
             }
             Behavior::StatefulAction(_name, ref mut state) => {
                 state.reset();

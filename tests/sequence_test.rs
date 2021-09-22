@@ -17,6 +17,26 @@ fn test_simple_sequence() {
     let (res, debug_repr) = bt.tick(1.0, &mut ());
     assert_eq!(res, Status::Success);
     assert_eq!(debug_repr.cursor.index(), 5);
+
+    assert_eq!(bt.status, Status::Success);
+    if let Behavior::Sequence(_, ref nodes) = bt.behavior {
+        for node in nodes.iter() {
+            assert_eq!(node.borrow().status, Status::Success);
+        }
+    } else {
+        panic!("Expected sequence")
+    }
+
+    bt.reset();
+    assert_eq!(bt.status, Status::Initialized);
+
+    if let Behavior::Sequence(_, ref nodes) = bt.behavior {
+        for node in nodes.iter() {
+            assert_eq!(node.borrow().status, Status::Initialized);
+        }
+    } else {
+        panic!("Expected sequence")
+    }
 }
 
 #[test]
@@ -29,9 +49,13 @@ fn test_simple_sequence_inv() {
         NoTick::action(),
     ]);
 
+    assert_eq!(bt.status, Status::Initialized);
+
     let (res, debug_repr) = bt.tick(1.0, &mut ());
     assert_eq!(res, Status::Failure);
     assert_eq!(debug_repr.cursor.index(), 0);
+
+    assert_eq!(bt.status, Status::Failure);
 }
 
 // Sequence

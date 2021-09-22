@@ -55,7 +55,7 @@ impl<T> StatefulAction<T> for NoTick {
     }
 
     fn reset(&mut self) {
-        panic!("Since NoTick should never be ticked, it should also never be reset");
+        // no-op to allow testing reset on bigger trees
     }
 }
 

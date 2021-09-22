@@ -13,6 +13,28 @@ fn test_simple_select() {
     let (res, debug_repr) = bt.tick(1.0, &mut ());
     assert_eq!(res, Status::Success);
     assert_eq!(debug_repr.cursor.index(), 2);
+
+    assert_eq!(bt.status, Status::Success);
+    if let Behavior::Select(_, ref nodes) = bt.behavior {
+        assert_eq!(nodes[0].borrow().status, Status::Failure);
+        assert_eq!(nodes[1].borrow().status, Status::Failure);
+        assert_eq!(nodes[2].borrow().status, Status::Success);
+        assert_eq!(nodes[3].borrow().status, Status::Initialized);
+        assert_eq!(nodes[4].borrow().status, Status::Initialized);
+    } else {
+        panic!("Expected sequence")
+    }
+
+    bt.reset();
+    assert_eq!(bt.status, Status::Initialized);
+
+    if let Behavior::Select(_, ref nodes) = bt.behavior {
+        for node in nodes.iter() {
+            assert_eq!(node.borrow().status, Status::Initialized);
+        }
+    } else {
+        panic!("Expected sequence")
+    }
 }
 
 #[test]
