@@ -100,3 +100,38 @@ impl<T> StatefulAction<T> for ConstAction {
 //         panic!("AlwaysRunning should never be reset");
 //     }
 // }
+
+#[derive(Default)]
+pub struct Counter {
+    pub value: Rc<RefCell<i32>>,
+    resettable: bool,
+}
+
+impl Counter {
+    pub fn action<T>(resettable: bool) -> (Rc<RefCell<Node<T>>>, Rc<RefCell<i32>>) {
+        let value = Rc::new(RefCell::new(0));
+        (
+            Rc::new(RefCell::new(Node::stateful_action(
+                "counter",
+                Box::new(Self {
+                    value: value.clone(),
+                    resettable,
+                }),
+            ))),
+            value,
+        )
+    }
+}
+
+impl<T> StatefulAction<T> for Counter {
+    fn tick(&mut self, _data: &mut T) -> Status {
+        *self.value.borrow_mut() += 1;
+        return Status::Success;
+    }
+
+    fn reset(&mut self) {
+        if self.resettable {
+            *self.value.borrow_mut() = 0;
+        }
+    }
+}

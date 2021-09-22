@@ -110,12 +110,20 @@ impl<T> Node<T> {
         })
     }
 
-    pub fn named_while_single(name: &str, cond: fn(&T) -> bool, child: Node<T>) -> Node<T> {
+    pub fn named_while_single(name: &str, cond: Box<dyn Fn(&T) -> bool>, child: Node<T>) -> Node<T> {
         Self::new_named(
             name.to_owned(),
             Behavior::While(cond, Rc::new(RefCell::new(child))),
         )
     }
+
+    pub fn named_while_single_child(name: &str, cond: Box<dyn Fn(&T) -> bool>, child: Rc<RefCell<Node<T>>>) -> Node<T> {
+        Self::new_named(
+            name.to_owned(),
+            Behavior::While(cond, child),
+        )
+    }
+
 
     // pub fn while_single(cond: fn(&T) -> bool, child: Node<T>) -> Node<T> {
     //     Self::new(Behavior::While(cond, Rc::new(RefCell::new(child))))

@@ -89,22 +89,6 @@ fn test_simple_select_fail() {
 
 #[test]
 fn test_condition_recheck() {
-    #[derive(Default)]
-    struct Counter {
-        value: i32,
-    }
-
-    impl<T> StatefulAction<T> for Counter {
-        fn tick(&mut self, _data: &mut T) -> Status {
-            self.value += 1;
-            return Status::Success;
-        }
-
-        fn reset(&mut self) {
-            self.value = 0;
-        }
-    }
-
     let const_status = Rc::new(RefCell::new(Status::Failure));
 
     let mut bt: Node<()> = Node::select(vec![

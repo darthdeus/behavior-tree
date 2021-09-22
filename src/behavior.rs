@@ -50,7 +50,7 @@ pub enum Behavior<T> {
     // Condition(Rc<dyn Fn(f64, &mut T, &P) -> bool>, Rc<Behavior<T>>),
     // WaitForever,
     // Action(T),
-    While(fn(&T) -> bool, Rc<RefCell<Node<T>>>),
+    While(Box<dyn Fn(&T) -> bool>, Rc<RefCell<Node<T>>>),
 }
 
 fn sequence<T>(
