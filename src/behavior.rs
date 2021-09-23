@@ -75,6 +75,13 @@ fn sequence<T>(
     for i in 0..*current {
         if xs[i].borrow_mut().recheck_condition(context, is_sequence) {
             *current = i;
+            for j in (i+1)..len {
+                if j < len {
+                    xs[j].borrow_mut().reset();
+                }
+            }
+            // TODO: add a test that verifies that the break is needed
+            break;
         }
     }
 
