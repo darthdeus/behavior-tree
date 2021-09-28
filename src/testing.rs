@@ -126,7 +126,7 @@ impl Counter {
 impl<T> StatefulAction<T> for Counter {
     fn tick(&mut self, _data: &mut T) -> Status {
         *self.value.borrow_mut() += 1;
-        return Status::Success;
+        Status::Success
     }
 
     fn reset(&mut self) {
