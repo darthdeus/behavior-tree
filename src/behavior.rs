@@ -17,7 +17,7 @@ impl<T> BehaviorTree<T> {
         let debug = root.borrow().to_debug();
 
         Self {
-            tree: root.clone(),
+            tree: root,
             debug,
         }
     }
