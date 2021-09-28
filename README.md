@@ -10,6 +10,20 @@
 
 **USE AT YOUR OWN RISK. This crate is under heavy development at the moment and a lot of the APIs will change often and without any notice. Performance is also terrible right now.**
 
+Implemented nodes:
+
+- Sequence - execute child nodes in a sequence until one of them fails.
+- Select - execute child nodes in a sequence until one of them succeeds.
+- While - execute a child node only when a condition is true.
+- Wait - constant time delay.
+- Action - generic user-defined action.
+- StatefulAction - generic user-defined action which manages its own state in addition to the tree-wide Blackboard.
+- Cond - checks a condition and executes either the `positive` or `negative` child.
+
+Almost all of the behaviors have test coverage including a few of the edge cases, but it is by no means exhaustive yet.
+
+**There are a few quirks that need to be figured out, especially with respect to debugging/visualization, which will be stabilized before version `0.1`.**
+
 ## Other behavior tree crates
 
 There are a few other crates that implement behavior trees (listed below).
