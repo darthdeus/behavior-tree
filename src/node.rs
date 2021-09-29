@@ -132,8 +132,6 @@ impl<T> Node<T> {
     // }
 
     pub fn collapse(self, desc: &str) -> Node<T> {
-        // self
-        // TODO: re-enable once behavior-tree-egui catches up
         Self {
             collapse_as: Some(desc.to_owned()),
             ..self
