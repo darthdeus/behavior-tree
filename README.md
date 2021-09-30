@@ -16,6 +16,7 @@ Implemented nodes:
 - Select - execute child nodes in a sequence until one of them succeeds.
 - While - execute a child node only when a condition is true.
 - Wait - constant time delay.
+- RandomWait - random time delay with a defined max.
 - Action - generic user-defined action.
 - StatefulAction - generic user-defined action which manages its own state in addition to the tree-wide Blackboard.
 - Cond - checks a condition and executes either the `positive` or `negative` child.
