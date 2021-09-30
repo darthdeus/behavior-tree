@@ -4,7 +4,7 @@ version = 3
 
 [[package]]
 name = "behavior-tree"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "rand",
  "tracing",
