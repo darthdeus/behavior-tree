@@ -16,10 +16,7 @@ impl<T> BehaviorTree<T> {
         let root = Rc::new(RefCell::new(root));
         let debug = root.borrow().to_debug();
 
-        Self {
-            tree: root,
-            debug,
-        }
+        Self { tree: root, debug }
     }
 }
 
@@ -28,6 +25,13 @@ pub enum Behavior<T> {
         curr: f64,
         max: f64,
     },
+
+    RandomWait {
+        curr: f64,
+        curr_max: f64,
+        max: f64,
+    },
+
     Cond(
         String,
         // Rc<dyn Fn(&mut T, &P) -> bool>,
@@ -75,7 +79,7 @@ fn sequence<T>(
     for i in 0..*current {
         if xs[i].borrow_mut().recheck_condition(context, is_sequence) {
             *current = i;
-            for j in (i+1)..len {
+            for j in (i + 1)..len {
                 if j < len {
                     xs[j].borrow_mut().reset();
                 }
@@ -172,6 +176,21 @@ impl<T> Behavior<T> {
         let _status = match self {
             Behavior::Wait {
                 ref mut curr,
+                max: _,
+            } => {
+                *curr -= delta;
+                let status = if *curr <= 0.0 {
+                    Status::Success
+                } else {
+                    Status::Running
+                };
+
+                return (status, DebugRepr::new("Wait", Cursor::Leaf, status));
+            }
+
+            Behavior::RandomWait {
+                ref mut curr,
+                curr_max: _,
                 max: _,
             } => {
                 *curr -= delta;
@@ -282,6 +301,10 @@ impl<T> Behavior<T> {
         match self {
             Behavior::Wait { ref mut curr, max } => {
                 *curr = *max;
+            }
+            Behavior::RandomWait { ref mut curr, ref mut curr_max, max } => {
+                *curr_max = rand::random::<f64>() * *max;
+                *curr = *curr_max;
             }
             Behavior::Sequence(ref mut idx, nodes) => {
                 *idx = 0;

@@ -156,6 +156,7 @@ impl<T> Node<T> {
     pub fn children(&self) -> Vec<Rc<RefCell<Node<T>>>> {
         match &self.behavior {
             Behavior::Wait { .. } => vec![],
+            Behavior::RandomWait { .. } => vec![],
             Behavior::Cond(_, _, positive, negative) => vec![positive.clone(), negative.clone()],
             Behavior::Sequence(_, ref seq) => seq.clone(),
             Behavior::Select(_, ref seq) => seq.clone(),
@@ -172,6 +173,7 @@ impl<T> Node<T> {
             None => {
                 match &self.behavior {
                     Behavior::Wait { curr, max } => format!("Wait {:.2}/{:.2}", curr, max),
+                    Behavior::RandomWait { curr, curr_max, max } => format!("RandomWait {:.2}/{:.2} ({:.2})", curr, curr_max, max),
                     Behavior::Cond(name, _cond, _a, _b) => format!("Cond {}", name),
                     // TreeRepr::new("Cond", vec![a.borrow().to_debug(), b.borrow().to_debug()])
                     //     .with_detail(name.clone())
@@ -203,6 +205,8 @@ impl<T> Node<T> {
                 match &self.behavior {
                     Behavior::Wait { curr, max } => TreeRepr::new("Wait", vec![])
                         .with_detail(format!("curr={}, max={}", curr, max)),
+                    Behavior::RandomWait { curr, curr_max, max } => TreeRepr::new("RandomWait", vec![])
+                        .with_detail(format!("curr={}, curr_max={}, max={}", curr, curr_max, max)),
                     Behavior::Cond(name, _cond, a, b) => {
                         TreeRepr::new("Cond", vec![a.borrow().to_debug(), b.borrow().to_debug()])
                             .with_detail(name.clone())
