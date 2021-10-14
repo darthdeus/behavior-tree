@@ -1,5 +1,5 @@
-use crate::prelude::*;
 use crate::maybe_profile_function;
+use crate::prelude::*;
 use std::{cell::RefCell, rc::Rc};
 
 pub struct Node<T> {
@@ -113,20 +113,34 @@ impl<T> Node<T> {
         })
     }
 
-    pub fn named_while_single(name: &str, cond: Box<dyn Fn(&T) -> bool>, child: Node<T>) -> Node<T> {
+    pub fn random_wait(time: f64) -> Node<T> {
+        let curr_max = rand::random::<f64>() * time;
+
+        Self::new(Behavior::RandomWait {
+            curr: curr_max,
+            curr_max,
+            max: time,
+        })
+    }
+
+    pub fn named_while_single(
+        name: &str,
+        cond: Box<dyn Fn(&T) -> bool>,
+        child: Node<T>,
+    ) -> Node<T> {
         Self::new_named(
             name.to_owned(),
             Behavior::While(cond, Rc::new(RefCell::new(child))),
         )
     }
 
-    pub fn named_while_single_child(name: &str, cond: Box<dyn Fn(&T) -> bool>, child: Rc<RefCell<Node<T>>>) -> Node<T> {
-        Self::new_named(
-            name.to_owned(),
-            Behavior::While(cond, child),
-        )
+    pub fn named_while_single_child(
+        name: &str,
+        cond: Box<dyn Fn(&T) -> bool>,
+        child: Rc<RefCell<Node<T>>>,
+    ) -> Node<T> {
+        Self::new_named(name.to_owned(), Behavior::While(cond, child))
     }
-
 
     // pub fn while_single(cond: fn(&T) -> bool, child: Node<T>) -> Node<T> {
     //     Self::new(Behavior::While(cond, Rc::new(RefCell::new(child))))
@@ -178,7 +192,11 @@ impl<T> Node<T> {
             None => {
                 match &self.behavior {
                     Behavior::Wait { curr, max } => format!("Wait {:.2}/{:.2}", curr, max),
-                    Behavior::RandomWait { curr, curr_max, max } => format!("RandomWait {:.2}/{:.2} ({:.2})", curr, curr_max, max),
+                    Behavior::RandomWait {
+                        curr,
+                        curr_max,
+                        max,
+                    } => format!("RandomWait {:.2}/{:.2} ({:.2})", curr, curr_max, max),
                     Behavior::Cond(name, _cond, _a, _b) => format!("Cond {}", name),
                     // TreeRepr::new("Cond", vec![a.borrow().to_debug(), b.borrow().to_debug()])
                     //     .with_detail(name.clone())
@@ -196,7 +214,10 @@ impl<T> Node<T> {
                     // Behavior::While(_, x) => TreeRepr::new("While", vec![x.to_debug()]),
                     // TODO: add to detail
                     Behavior::While(_, _x) => {
-                        format!("While {}", self.name.as_ref().expect("While must have a name"))
+                        format!(
+                            "While {}",
+                            self.name.as_ref().expect("While must have a name")
+                        )
                     }
                 }
             }
@@ -212,7 +233,11 @@ impl<T> Node<T> {
                 match &self.behavior {
                     Behavior::Wait { curr, max } => TreeRepr::new("Wait", vec![])
                         .with_detail(format!("curr={}, max={}", curr, max)),
-                    Behavior::RandomWait { curr, curr_max, max } => TreeRepr::new("RandomWait", vec![])
+                    Behavior::RandomWait {
+                        curr,
+                        curr_max,
+                        max,
+                    } => TreeRepr::new("RandomWait", vec![])
                         .with_detail(format!("curr={}, curr_max={}, max={}", curr, curr_max, max)),
                     Behavior::Cond(name, _cond, a, b) => {
                         TreeRepr::new("Cond", vec![a.borrow().to_debug(), b.borrow().to_debug()])
@@ -258,9 +283,7 @@ impl<T> Node<T> {
         maybe_profile_function!();
 
         match &self.behavior {
-            Behavior::While(cond, _) => {
-                cond(context) != is_sequence
-            }
+            Behavior::While(cond, _) => cond(context) != is_sequence,
             _ => false,
             // Behavior::Sequence(_, _) => todo!(),
             // Behavior::Select(_, _) => todo!(),
