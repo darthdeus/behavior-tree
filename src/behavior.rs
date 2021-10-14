@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::maybe_profile_function;
 use std::{cell::RefCell, rc::Rc};
 
 pub trait StatefulAction<T> {
@@ -64,6 +65,8 @@ fn sequence<T>(
     current: &mut usize,
     xs: &mut Vec<Rc<RefCell<Node<T>>>>,
 ) -> (Status, DebugRepr) {
+    maybe_profile_function!();
+
     let (status_positive, status_negative) = if is_sequence {
         (Status::Success, Status::Failure)
     } else {
@@ -173,6 +176,8 @@ fn sequence<T>(
 
 impl<T> Behavior<T> {
     pub fn tick(&mut self, delta: f64, context: &mut T) -> (Status, DebugRepr) {
+        maybe_profile_function!();
+
         let _status = match self {
             Behavior::Wait {
                 ref mut curr,
@@ -298,11 +303,17 @@ impl<T> Behavior<T> {
     }
 
     pub fn reset(&mut self) {
+        maybe_profile_function!();
+
         match self {
             Behavior::Wait { ref mut curr, max } => {
                 *curr = *max;
             }
-            Behavior::RandomWait { ref mut curr, ref mut curr_max, max } => {
+            Behavior::RandomWait {
+                ref mut curr,
+                ref mut curr_max,
+                max,
+            } => {
                 *curr_max = rand::random::<f64>() * *max;
                 *curr = *curr_max;
             }
@@ -330,6 +341,8 @@ impl<T> Behavior<T> {
 
 impl<T> core::fmt::Debug for Behavior<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        maybe_profile_function!();
+
         match self {
             Behavior::Wait{curr, max} => {
                 f.debug_struct("Wait").field("current", curr).field("max", max);

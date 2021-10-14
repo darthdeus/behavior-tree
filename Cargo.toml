@@ -1,6 +1,6 @@
 [package]
 name = "behavior-tree"
-version = "0.0.6"
+version = "0.0.7"
 edition = "2018"
 license = "MIT"
 
@@ -14,8 +14,12 @@ keywords = ["gamedev", "ai"]
 [lib]
 doctest = false
 
+[features]
+profiling = ["puffin"]
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 tracing = "0.1"
 rand = "0.8.4"
+puffin = { version = "0.7.0", optional = true }

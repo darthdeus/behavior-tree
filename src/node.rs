@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::maybe_profile_function;
 use std::{cell::RefCell, rc::Rc};
 
 pub struct Node<T> {
@@ -144,6 +145,8 @@ impl<T> Node<T> {
     }
 
     pub fn tick(&mut self, delta: f64, context: &mut T) -> (Status, DebugRepr) {
+        maybe_profile_function!();
+
         if self.status == Status::Success || self.status == Status::Failure {
             self.reset();
         }
@@ -168,6 +171,8 @@ impl<T> Node<T> {
     }
 
     pub fn name(&self) -> String {
+        maybe_profile_function!();
+
         match &self.collapse_as {
             Some(collapse_text) => collapse_text.clone(),
             None => {
@@ -199,6 +204,8 @@ impl<T> Node<T> {
     }
 
     pub fn to_debug(&self) -> TreeRepr {
+        maybe_profile_function!();
+
         let mut repr = match &self.collapse_as {
             Some(collapse_text) => TreeRepr::new(collapse_text, vec![]),
             None => {
@@ -248,6 +255,8 @@ impl<T> Node<T> {
     }
 
     pub fn recheck_condition(&mut self, context: &T, is_sequence: bool) -> bool {
+        maybe_profile_function!();
+
         match &self.behavior {
             Behavior::While(cond, _) => {
                 cond(context) != is_sequence

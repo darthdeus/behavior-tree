@@ -33,3 +33,11 @@ macro_rules! while_single {
         Node::named_while_single(stringify!($cond), $cond, $child)
     };
 }
+
+#[macro_export]
+macro_rules! maybe_profile_function {
+    () => {
+        #[cfg(feature = "puffin")]
+        puffin::profile_function!();
+    }
+}
