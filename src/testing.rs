@@ -33,9 +33,7 @@ impl<T> StatefulAction<T> for YesTick {
 
 impl Drop for YesTick {
     fn drop(&mut self) {
-        if !self.ticked {
-            panic!("YesTick dropped without being ticked");
-        }
+        assert!(self.ticked, "YesTick dropped without being ticked");
     }
 }
 
