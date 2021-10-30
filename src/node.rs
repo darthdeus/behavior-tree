@@ -223,61 +223,6 @@ impl<T> Node<T> {
         }
     }
 
-    pub fn to_debug(&self) -> TreeRepr {
-        maybe_profile_function!();
-
-        let mut repr = match &self.collapse_as {
-            Some(collapse_text) => TreeRepr::new(collapse_text, vec![]),
-            None => {
-                match &self.behavior {
-                    Behavior::Wait { curr, max } => TreeRepr::new("Wait", vec![])
-                        .with_detail(format!("curr={}, max={}", curr, max)),
-                    Behavior::RandomWait {
-                        curr,
-                        curr_max,
-                        max,
-                    } => TreeRepr::new("RandomWait", vec![])
-                        .with_detail(format!("curr={}, curr_max={}, max={}", curr, curr_max, max)),
-                    Behavior::Cond(name, _cond, a, b) => {
-                        TreeRepr::new("Cond", vec![a.borrow().to_debug(), b.borrow().to_debug()])
-                            .with_detail(name.clone())
-                    }
-                    Behavior::Sequence(_, seq) => TreeRepr::new(
-                        if let Some(ref name) = self.name {
-                            format!("Sequence {}", name)
-                        } else {
-                            "Sequence".to_string()
-                        },
-                        seq.iter().map(|x| x.borrow().to_debug()).collect(),
-                    ),
-                    Behavior::Select(_, seq) => TreeRepr::new(
-                        if let Some(ref name) = self.name {
-                            format!("Select {}", name)
-                        } else {
-                            "Select".to_string()
-                        },
-                        seq.iter().map(|x| x.borrow().to_debug()).collect(),
-                    ),
-                    Behavior::Action(name, _) => {
-                        TreeRepr::new("Action", vec![]).with_detail(name.clone())
-                    }
-                    Behavior::ActionSuccess(name, _) => {
-                        TreeRepr::new("ActionSuccess", vec![]).with_detail(name.clone())
-                    }
-                    Behavior::StatefulAction(name, _) => {
-                        TreeRepr::new("StatefulAction", vec![]).with_detail(name.clone())
-                    }
-                    // Behavior::While(_, x) => TreeRepr::new("While", vec![x.to_debug()]),
-                    // TODO: add to detail
-                    Behavior::While(_, x) => x.borrow().to_debug(),
-                }
-            }
-        };
-
-        repr.status = self.status;
-        repr
-    }
-
     pub fn recheck_condition(&mut self, context: &T, is_sequence: bool) -> bool {
         maybe_profile_function!();
 

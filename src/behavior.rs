@@ -9,15 +9,13 @@ pub trait StatefulAction<T> {
 
 pub struct BehaviorTree<T> {
     pub tree: Rc<RefCell<Node<T>>>,
-    pub debug: TreeRepr,
 }
 
 impl<T> BehaviorTree<T> {
     pub fn new(root: Node<T>) -> Self {
         let root = Rc::new(RefCell::new(root));
-        let debug = root.borrow().to_debug();
 
-        Self { tree: root, debug }
+        Self { tree: root }
     }
 }
 
