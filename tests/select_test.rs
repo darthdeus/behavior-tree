@@ -12,9 +12,8 @@ fn test_simple_select() {
         NoTick::action(),
     ]);
 
-    let (res, debug_repr) = bt.tick(1.0, &mut ());
+    let res = bt.tick(1.0, &mut ());
     assert_eq!(res, Status::Success);
-    assert_eq!(debug_repr.cursor.index(), 2);
 
     assert_eq!(bt.status, Status::Success);
     if let Behavior::Select(_, ref nodes) = bt.behavior {
@@ -49,9 +48,8 @@ fn test_simple_select_inv() {
         NoTick::action(),
     ]);
 
-    let (res, debug_repr) = bt.tick(1.0, &mut ());
+    let res = bt.tick(1.0, &mut ());
     assert_eq!(res, Status::Success);
-    assert_eq!(debug_repr.cursor.index(), 0);
 }
 
 #[test]
@@ -67,9 +65,8 @@ fn test_simple_select_running() {
         NoTick::action(),
     ]);
 
-    let (res, debug_repr) = bt.tick(1.0, &mut ());
+    let res = bt.tick(1.0, &mut ());
     assert_eq!(res, Status::Running);
-    assert_eq!(debug_repr.cursor.index(), 3);
 }
 
 #[test]
@@ -82,9 +79,8 @@ fn test_simple_select_fail() {
         Node::action("fail", |_| Status::Failure),
     ]);
 
-    let (res, debug_repr) = bt.tick(1.0, &mut ());
+    let res = bt.tick(1.0, &mut ());
     assert_eq!(res, Status::Failure);
-    assert_eq!(debug_repr.cursor.index(), 5);
 }
 
 #[test]
@@ -102,19 +98,16 @@ fn test_condition_recheck() {
         AlwaysRunning::action(),
     ]);
 
-    let (status, debug_repr) = bt.tick(1.0, &mut ());
+    let status = bt.tick(1.0, &mut ());
     assert_eq!(status, Status::Success);
-    assert_eq!(debug_repr.cursor.index(), 1);
 
     *const_status.borrow_mut() = Status::Success;
 
-    let (status, debug_repr) = bt.tick(1.0, &mut ());
+    let status = bt.tick(1.0, &mut ());
     assert_eq!(status, Status::Success);
-    assert_eq!(debug_repr.cursor.index(), 0);
 
     *const_status.borrow_mut() = Status::Running;
 
-    let (status, debug_repr) = bt.tick(1.0, &mut ());
+    let status = bt.tick(1.0, &mut ());
     assert_eq!(status, Status::Running);
-    assert_eq!(debug_repr.cursor.index(), 0);
 }

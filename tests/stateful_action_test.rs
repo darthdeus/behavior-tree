@@ -48,21 +48,18 @@ fn test_stateful_action() {
     assert_eq!(*v1.borrow(), 0);
     assert_eq!(*v2.borrow(), 0);
 
-    let (status, debug_repr) = bt.tick(0.0, &mut data);
+    let status = bt.tick(0.0, &mut data);
     assert_eq!(status, Status::Running);
-    assert_eq!(debug_repr.cursor.index(), 0);
     assert_eq!(*v1.borrow(), 1);
     assert_eq!(*v2.borrow(), 0);
 
-    let (status, debug_repr) = bt.tick(0.0, &mut data);
+    let status = bt.tick(0.0, &mut data);
     assert_eq!(status, Status::Running);
-    assert_eq!(debug_repr.cursor.index(), 1);
     assert_eq!(*v1.borrow(), 1);
     assert_eq!(*v2.borrow(), 1);
 
-    let (status, debug_repr) = bt.tick(0.0, &mut data);
+    let status = bt.tick(0.0, &mut data);
     assert_eq!(status, Status::Success);
-    assert_eq!(debug_repr.cursor.index(), 2);
     assert_eq!(*v1.borrow(), 1);
     assert_eq!(*v2.borrow(), 1);
 

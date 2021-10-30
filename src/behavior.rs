@@ -1,5 +1,5 @@
-use crate::prelude::*;
 use crate::maybe_profile_function;
+use crate::prelude::*;
 use std::{cell::RefCell, rc::Rc};
 
 pub trait StatefulAction<T> {
@@ -64,7 +64,7 @@ fn sequence<T>(
     is_sequence: bool,
     current: &mut usize,
     xs: &mut Vec<Rc<RefCell<Node<T>>>>,
-) -> (Status, DebugRepr) {
+) -> Status {
     maybe_profile_function!();
 
     let (status_positive, status_negative) = if is_sequence {
@@ -75,7 +75,6 @@ fn sequence<T>(
 
     let mut repr_string = String::new();
     let mut status = status_positive;
-    let mut child_repr = None;
 
     let len = xs.len();
 
@@ -105,21 +104,18 @@ fn sequence<T>(
             // continue;
             x.reset();
         }
-        let (res, repr) = x.tick(delta, context);
+        let res = x.tick(delta, context);
 
         if res == status_positive {
             *current += 1;
             repr_string += "+";
-            child_repr = Some(repr);
         } else if res == status_negative {
             status = status_negative;
             repr_string += "-";
-            child_repr = Some(repr);
             break;
         } else {
             status = Status::Running;
             repr_string += ".";
-            child_repr = Some(repr);
             break;
         }
 
@@ -135,17 +131,7 @@ fn sequence<T>(
         // }
     }
 
-    let mut repr = DebugRepr::new(
-        "Sequence",
-        Cursor::Index(
-            *current,
-            Box::new(child_repr.expect("Sequence must have a child repr since it's non-empty")),
-        ),
-        status,
-    );
-    repr.params = Some(repr_string);
-
-    (status, repr)
+    status
 }
 //
 // for (i, x) in xs.iter_mut().enumerate() {
@@ -175,7 +161,7 @@ fn sequence<T>(
 // }
 
 impl<T> Behavior<T> {
-    pub fn tick(&mut self, delta: f64, context: &mut T) -> (Status, DebugRepr) {
+    pub fn tick(&mut self, delta: f64, context: &mut T) -> Status {
         maybe_profile_function!();
 
         let _status = match self {
@@ -190,7 +176,7 @@ impl<T> Behavior<T> {
                     Status::Running
                 };
 
-                return (status, DebugRepr::new("Wait", Cursor::Leaf, status));
+                return status;
             }
 
             Behavior::RandomWait {
@@ -205,28 +191,19 @@ impl<T> Behavior<T> {
                     Status::Running
                 };
 
-                return (status, DebugRepr::new("Wait", Cursor::Leaf, status));
+                return status;
             }
 
-            Behavior::Cond(s, cond, a, b) => {
+            Behavior::Cond(_, cond, a, b) => {
                 let c = cond(context);
 
-                let (status, child_repr) = if c {
+                let status = if c {
                     a.borrow_mut().tick(delta, context)
                 } else {
                     b.borrow_mut().tick(delta, context)
                 };
 
-                // let mut repr = DebugRepr::new("If", Cursor::Condition(c), status);
-                let mut repr = DebugRepr::new(
-                    "If",
-                    Cursor::Index(if c { 0 } else { 1 }, Box::new(child_repr)),
-                    status,
-                )
-                .with_override(c);
-
-                repr.params = Some(format!("true? = {:?} ... str = {:?}", c, s));
-                return (status, repr);
+                return status;
             }
 
             Behavior::Sequence(ref mut current, xs) => {
@@ -237,31 +214,26 @@ impl<T> Behavior<T> {
                 return sequence(delta, context, false, current, xs)
             }
 
-            Behavior::Action(name, action) => {
+            Behavior::Action(_, action) => {
                 let status = action(context);
-                return (status, DebugRepr::new(name, Cursor::Leaf, status));
+                return status;
             }
 
-            Behavior::ActionSuccess(name, action) => {
+            Behavior::ActionSuccess(_, action) => {
                 let _ = action(context);
-                return (
-                    Status::Success,
-                    DebugRepr::new(name, Cursor::Leaf, Status::Success),
-                );
+                return Status::Success;
             }
 
             // TODO: state reset?
-            Behavior::StatefulAction(name, action) => {
-                let status = action.tick(context);
-                return (status, DebugRepr::new(name, Cursor::Leaf, status));
+            Behavior::StatefulAction(_, action) => {
+                return action.tick(context);
             }
 
             Behavior::While(cond, behavior) => {
                 if cond(context) {
                     return behavior.borrow_mut().tick(delta, context);
                 } else {
-                    let status = Status::Failure;
-                    return (status, DebugRepr::new("while", Cursor::Leaf, status));
+                    return Status::Failure;
                 }
             } //     Status::Success => Status::Failure,
               //     Status::Failure => Status::Success,

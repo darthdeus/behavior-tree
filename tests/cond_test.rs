@@ -1,11 +1,10 @@
 use behavior_tree::*;
 
 #[derive(Default)]
-    struct Blackboard {
-        is_foo: bool,
-        result: String,
-    }
-
+struct Blackboard {
+    is_foo: bool,
+    result: String,
+}
 
 #[test]
 fn test_cond_simple_true() {
@@ -48,15 +47,13 @@ fn test_cond() {
         result: "".to_string(),
     };
 
-    let (status, debug) = bt.tick(1.0, &mut bb);
+    let status = bt.tick(1.0, &mut bb);
     assert_eq!(bb.result, "no");
     assert_eq!(status, Status::Success);
-    assert_eq!(debug.cursor.index(), 1);
 
     bb.is_foo = true;
 
-    let (status, debug) = bt.tick(1.0, &mut bb);
+    let status = bt.tick(1.0, &mut bb);
     assert_eq!(bb.result, "yes");
     assert_eq!(status, Status::Success);
-    assert_eq!(debug.cursor.index(), 0);
 }

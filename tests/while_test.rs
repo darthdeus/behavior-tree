@@ -12,11 +12,11 @@ fn test_simple_while_positive() {
     let mut bt: Node<Blackboard> =
         Node::named_while_single("test", Box::new(|data| data.cond), NoTick::action());
 
-    let (status, _) = bt.tick(1.0, &mut bb);
+    let status = bt.tick(1.0, &mut bb);
     assert_eq!(status, Status::Failure);
-    let (status, _) = bt.tick(1.0, &mut bb);
+    let status = bt.tick(1.0, &mut bb);
     assert_eq!(status, Status::Failure);
-    let (status, _) = bt.tick(1.0, &mut bb);
+    let status = bt.tick(1.0, &mut bb);
     assert_eq!(status, Status::Failure);
 }
 
@@ -26,11 +26,11 @@ fn test_simple_while_negative() {
     let mut bt: Node<Blackboard> =
         Node::named_while_single("test", Box::new(|data| data.cond), YesTick::action());
 
-    let (status, _) = bt.tick(1.0, &mut bb);
+    let status = bt.tick(1.0, &mut bb);
     assert_eq!(status, Status::Success);
-    let (status, _) = bt.tick(1.0, &mut bb);
+    let status = bt.tick(1.0, &mut bb);
     assert_eq!(status, Status::Success);
-    let (status, _) = bt.tick(1.0, &mut bb);
+    let status = bt.tick(1.0, &mut bb);
     assert_eq!(status, Status::Success);
 }
 
@@ -40,11 +40,11 @@ fn test_simple_while_running() {
     let mut bt: Node<Blackboard> =
         Node::named_while_single("test", Box::new(|data| data.cond), AlwaysRunning::action());
 
-    let (status, _) = bt.tick(1.0, &mut bb);
+    let status = bt.tick(1.0, &mut bb);
     assert_eq!(status, Status::Running);
-    let (status, _) = bt.tick(1.0, &mut bb);
+    let status = bt.tick(1.0, &mut bb);
     assert_eq!(status, Status::Running);
-    let (status, _) = bt.tick(1.0, &mut bb);
+    let status = bt.tick(1.0, &mut bb);
     assert_eq!(status, Status::Running);
 }
 
@@ -56,11 +56,11 @@ fn test_while_sequence() {
         NoTick::action(),
     ]);
 
-    let (status, _) = bt.tick(1.0, &mut bb);
+    let status = bt.tick(1.0, &mut bb);
     assert_eq!(status, Status::Running);
-    let (status, _) = bt.tick(1.0, &mut bb);
+    let status = bt.tick(1.0, &mut bb);
     assert_eq!(status, Status::Running);
-    let (status, _) = bt.tick(1.0, &mut bb);
+    let status = bt.tick(1.0, &mut bb);
     assert_eq!(status, Status::Running);
 }
 
@@ -72,11 +72,11 @@ fn test_while_select() {
         YesTick::action(),
     ]);
 
-    let (status, _) = bt.tick(1.0, &mut bb);
+    let status = bt.tick(1.0, &mut bb);
     assert_eq!(status, Status::Success);
-    let (status, _) = bt.tick(1.0, &mut bb);
+    let status = bt.tick(1.0, &mut bb);
     assert_eq!(status, Status::Success);
-    let (status, _) = bt.tick(1.0, &mut bb);
+    let status = bt.tick(1.0, &mut bb);
     assert_eq!(status, Status::Success);
 }
 
@@ -103,45 +103,38 @@ fn test_while_select_recheck() {
         AlwaysRunning::action(),
     ]);
 
-    let (status, debug_repr) = bt.tick(1.0, &mut ());
+    let status = bt.tick(1.0, &mut ());
     assert_eq!(status, Status::Success);
     // TODO: index 1?
-    assert_eq!(debug_repr.cursor.index(), 0);
     assert_eq!(*counter.borrow(), 1);
 
-    let (status, debug_repr) = bt.tick(1.0, &mut ());
+    let status = bt.tick(1.0, &mut ());
     assert_eq!(status, Status::Success);
-    assert_eq!(debug_repr.cursor.index(), 0);
     assert_eq!(*counter.borrow(), 2);
 
     *value.borrow_mut() = false;
 
-    let (status, debug_repr) = bt.tick(1.0, &mut ());
+    let status = bt.tick(1.0, &mut ());
     assert_eq!(status, Status::Running);
-    assert_eq!(debug_repr.cursor.index(), 1);
     assert_eq!(*counter.borrow(), 2);
 
-    let (status, debug_repr) = bt.tick(1.0, &mut ());
+    let status = bt.tick(1.0, &mut ());
     assert_eq!(status, Status::Running);
-    assert_eq!(debug_repr.cursor.index(), 1);
     assert_eq!(*counter.borrow(), 2);
 
     *value.borrow_mut() = true;
 
-    let (status, debug_repr) = bt.tick(1.0, &mut ());
+    let status = bt.tick(1.0, &mut ());
     assert_eq!(status, Status::Success);
-    assert_eq!(debug_repr.cursor.index(), 0);
     assert_eq!(*counter.borrow(), 3);
 
     //     *const_status.borrow_mut() = Status::Success;
     //
-    //     let (status, debug_repr) = bt.tick(1.0, &mut ());
+    //     let status = bt.tick(1.0, &mut ());
     //     assert_eq!(status, Status::Success);
-    //     assert_eq!(debug_repr.cursor.index(), 0);
     //
     //     *const_status.borrow_mut() = Status::Running;
     //
-    //     let (status, debug_repr) = bt.tick(1.0, &mut ());
+    //     let status = bt.tick(1.0, &mut ());
     //     assert_eq!(status, Status::Running);
-    //     assert_eq!(debug_repr.cursor.index(), 0);
 }

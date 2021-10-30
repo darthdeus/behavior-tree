@@ -158,16 +158,15 @@ impl<T> Node<T> {
         self.behavior.reset();
     }
 
-    pub fn tick(&mut self, delta: f64, context: &mut T) -> (Status, DebugRepr) {
+    pub fn tick(&mut self, delta: f64, context: &mut T) -> Status {
         maybe_profile_function!();
 
         if self.status == Status::Success || self.status == Status::Failure {
             self.reset();
         }
 
-        let (status, repr) = self.behavior.tick(delta, context);
-        self.status = status;
-        (status, repr)
+        self.status = self.behavior.tick(delta, context);
+        self.status
     }
 
     pub fn children(&self) -> Vec<Rc<RefCell<Node<T>>>> {

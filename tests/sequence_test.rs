@@ -14,9 +14,8 @@ fn test_simple_sequence() {
 
     assert_eq!(bt.status, Status::Initialized);
 
-    let (res, debug_repr) = bt.tick(1.0, &mut ());
+    let res = bt.tick(1.0, &mut ());
     assert_eq!(res, Status::Success);
-    assert_eq!(debug_repr.cursor.index(), 5);
 
     assert_eq!(bt.status, Status::Success);
     if let Behavior::Sequence(_, ref nodes) = bt.behavior {
@@ -51,9 +50,8 @@ fn test_simple_sequence_inv() {
 
     assert_eq!(bt.status, Status::Initialized);
 
-    let (res, debug_repr) = bt.tick(1.0, &mut ());
+    let res = bt.tick(1.0, &mut ());
     assert_eq!(res, Status::Failure);
-    assert_eq!(debug_repr.cursor.index(), 0);
 
     assert_eq!(bt.status, Status::Failure);
 }
@@ -79,9 +77,8 @@ fn test_simple_running() {
 
     // Check that sequence doesn't step over running tasks
     for _ in 0..10 {
-        let (res, debug_repr) = bt.tick(1.0, &mut ());
+        let res = bt.tick(1.0, &mut ());
         assert_eq!(res, Status::Running);
-        assert_eq!(debug_repr.cursor.index(), 2);
     }
 }
 
@@ -95,20 +92,17 @@ fn test_simple_sequence_pingpong() {
 
     let mut data = EvenCounter { value: 0 };
 
-    let (status, debug_repr) = bt.tick(0.0, &mut data);
+    let status = bt.tick(0.0, &mut data);
     assert_eq!(status, Status::Running);
     assert_eq!(data.value, 1);
-    assert_eq!(debug_repr.cursor.index(), 0);
 
-    let (status, debug_repr) = bt.tick(0.0, &mut data);
+    let status = bt.tick(0.0, &mut data);
     assert_eq!(status, Status::Success);
     assert_eq!(data.value, 2);
-    assert_eq!(debug_repr.cursor.index(), 1);
 
-    let (status, debug_repr) = bt.tick(0.0, &mut data);
+    let status = bt.tick(0.0, &mut data);
     assert_eq!(status, Status::Running);
     assert_eq!(data.value, 3);
-    assert_eq!(debug_repr.cursor.index(), 0);
 }
 
 #[test]
@@ -149,39 +143,33 @@ fn test_nested_sequence() {
 
     let mut data = DoubleCounter { x: 0, y: 0 };
 
-    let (status, debug_repr) = bt.tick(0.0, &mut data);
+    let status = bt.tick(0.0, &mut data);
     assert_eq!(status, Status::Running);
     assert_eq!(data.x, 1);
     assert_eq!(data.y, 0);
-    assert_eq!(debug_repr.cursor.index(), 0);
 
-    let (status, debug_repr) = bt.tick(0.0, &mut data);
+    let status = bt.tick(0.0, &mut data);
     assert_eq!(status, Status::Running);
     assert_eq!(data.x, 1);
     assert_eq!(data.y, 1);
-    assert_eq!(debug_repr.cursor.index(), 1);
 
-    let (status, debug_repr) = bt.tick(0.0, &mut data);
+    let status = bt.tick(0.0, &mut data);
     assert_eq!(data.x, 1);
     assert_eq!(data.y, 1);
     assert_eq!(status, Status::Success);
-    assert_eq!(debug_repr.cursor.index(), 2);
 
-    let (status, debug_repr) = bt.tick(0.0, &mut data);
+    let status = bt.tick(0.0, &mut data);
     assert_eq!(data.x, 1);
     assert_eq!(data.y, 1);
     assert_eq!(status, Status::Success);
-    assert_eq!(debug_repr.cursor.index(), 2);
 
-    let (status, debug_repr) = bt.tick(0.0, &mut data);
+    let status = bt.tick(0.0, &mut data);
     assert_eq!(data.x, 1);
     assert_eq!(data.y, 1);
     assert_eq!(status, Status::Success);
-    assert_eq!(debug_repr.cursor.index(), 2);
 
-    // let (status, debug_repr) = bt.tick(0.0, &mut data);
+    // let status = bt.tick(0.0, &mut data);
     // assert_eq!(data.x, 4);
     // assert_eq!(data.y, 4);
     // assert_eq!(status, Status::Success);
-    // assert_eq!(debug_repr.cursor.index(), 2);
 }
